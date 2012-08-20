@@ -1,6 +1,6 @@
 ###
     Author:         Amsul - http://amsul.ca
-    Version:        0.1.0
+    Version:        0.2.0
     Created on:     19/08/2012
     Last Updated:   19 August, 2012
 ###
@@ -52,6 +52,9 @@ class Load
             ## load all the images
             loadImages().
 
+            ## load all the fonts
+            loadFonts().
+
             ## do stuff after all the things have started loading
             loadingStarted()
 
@@ -90,6 +93,7 @@ class Load
         ## filter the images to get only ones with `data-src`
         images.filter = ( image ) ->
             images.load image if image.dataset and image.dataset.src
+            return images
 
 
         ## load each filtered image
@@ -99,14 +103,17 @@ class Load
             onLoad = ( e ) ->
                 removeHandlers()
                 self.thingLoaded()
+                return
 
             onReadyStateChange = ( e ) ->
                 removeHandlers() if image.readyState is 'complete'
                 console.log( 'onReadyStateChange', e )
+                return
 
             onError = ( e ) ->
                 removeHandlers()
                 console.log( 'onError', e )
+                return
 
             ## remove event handlers
             removeHandlers = ->
@@ -114,6 +121,7 @@ class Load
                     unbind( image, 'load', onLoad ).
                     unbind( image, 'readyStateChange', onReadyStateChange ).
                     unbind( image, 'error', onError )
+                return
 
 
             ## update the filtered count
@@ -128,6 +136,8 @@ class Load
             ## begin the loading
             image.src = image.dataset.src
 
+            return images
+
 
         ## loop through and filter the images
         images.filter image for image in images.all
@@ -138,6 +148,83 @@ class Load
 
         return self
     #loadImages
+
+
+
+    ###
+    Load all the fonts with `data-src`
+    ======================================================================== ###
+
+    self.loadFonts = ->
+
+        fonts = {}
+
+        ## get all the fonts
+        fonts.all = document.querySelectorAll 'font'
+
+        ## filtered count
+        fonts.count = 0
+
+
+        ##filter the fonts to get only ones with `data-src`
+        fonts.filter = ( font ) ->
+            fonts.load font if font.dataset and font.dataset.src
+            return fonts
+
+
+        ## load each filtered font
+        fonts.load = ( font ) ->
+
+            newFont = new Font()
+
+            ## event handlers
+            onLoad = ( e ) ->
+                removeHandlers()
+                self.thingLoaded()
+                console.log( 'here', e, newFont )
+                return
+
+            onError = ( e ) ->
+                removeHandlers()
+                console.log( 'onError', e )
+                return
+
+            ## remove event handlers
+            removeHandlers = ->
+                newFont.onload = ->
+                newFont.onerror = ->
+                return
+
+            ## update the filtered count
+            fonts.count += 1
+
+            ## bind event listeners
+            newFont.onload = onLoad
+            newFont.onerror = onError
+
+            ## begin the loading
+            newFont.fontFamily = font.dataset.family
+            newFont.src = font.dataset.src
+
+            ## set the font family and force the whitespace fix
+            font.style.fontFamily = font.dataset.family.replace( /\ /g, '\\ ' )
+            
+            console.dir( font )
+
+            return fonts
+
+
+        ## loop through and filter the fonts
+        fonts.filter font for font in fonts.all
+
+
+        ## update the things count based on filtered count
+        self.things += fonts.count
+
+        return self
+    #loadFonts
+
+
 
 
 

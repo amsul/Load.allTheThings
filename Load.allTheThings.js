@@ -2,7 +2,7 @@
 
 /*
     Author:         Amsul - http://amsul.ca
-    Version:        0.1.0
+    Version:        0.2.0
     Created on:     19/08/2012
     Last Updated:   19 August, 2012
 */
@@ -55,7 +55,7 @@
       Load.elemProgress = options.progressId ? document.getElementById(options.progressId) : null;
       Load.elemThings = options.thingsId ? document.getElementById(options.thingsId) : null;
       Load.elemThingsLoaded = options.thingsLoadedId ? document.getElementById(options.thingsLoadedId) : null;
-      self.loadImages().loadingStarted();
+      self.loadImages().loadFonts().loadingStarted();
       /*
               ## if it's an object
               if things and typeof things is 'object' and Object.prototype.toString.call( things ) is '[object Object]'
@@ -85,31 +85,33 @@
       images.count = 0;
       images.filter = function(image) {
         if (image.dataset && image.dataset.src) {
-          return images.load(image);
+          images.load(image);
         }
+        return images;
       };
       images.load = function(image) {
         var onError, onLoad, onReadyStateChange, removeHandlers;
         onLoad = function(e) {
           removeHandlers();
-          return self.thingLoaded();
+          self.thingLoaded();
         };
         onReadyStateChange = function(e) {
           if (image.readyState === 'complete') {
             removeHandlers();
           }
-          return console.log('onReadyStateChange', e);
+          console.log('onReadyStateChange', e);
         };
         onError = function(e) {
           removeHandlers();
-          return console.log('onError', e);
+          console.log('onError', e);
         };
         removeHandlers = function() {
-          return self.unbind(image, 'load', onLoad).unbind(image, 'readyStateChange', onReadyStateChange).unbind(image, 'error', onError);
+          self.unbind(image, 'load', onLoad).unbind(image, 'readyStateChange', onReadyStateChange).unbind(image, 'error', onError);
         };
         images.count += 1;
         self.bind(image, 'load', onLoad).bind(image, 'readyStateChange', onReadyStateChange).bind(image, 'error', onError);
-        return image.src = image.dataset.src;
+        image.src = image.dataset.src;
+        return images;
       };
       _ref = images.all;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -117,6 +119,57 @@
         images.filter(image);
       }
       self.things += images.count;
+      return self;
+    };
+
+    /*
+        Load all the fonts with `data-src`
+        ========================================================================
+    */
+
+
+    self.loadFonts = function() {
+      var font, fonts, _i, _len, _ref;
+      fonts = {};
+      fonts.all = document.querySelectorAll('font');
+      fonts.count = 0;
+      fonts.filter = function(font) {
+        if (font.dataset && font.dataset.src) {
+          fonts.load(font);
+        }
+        return fonts;
+      };
+      fonts.load = function(font) {
+        var newFont, onError, onLoad, removeHandlers;
+        newFont = new Font();
+        onLoad = function(e) {
+          removeHandlers();
+          self.thingLoaded();
+          console.log('here', e, newFont);
+        };
+        onError = function(e) {
+          removeHandlers();
+          console.log('onError', e);
+        };
+        removeHandlers = function() {
+          newFont.onload = function() {};
+          newFont.onerror = function() {};
+        };
+        fonts.count += 1;
+        newFont.onload = onLoad;
+        newFont.onerror = onError;
+        newFont.fontFamily = font.dataset.family;
+        newFont.src = font.dataset.src;
+        font.style.fontFamily = font.dataset.family.replace(/\ /g, '\\ ');
+        console.dir(font);
+        return fonts;
+      };
+      _ref = fonts.all;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        font = _ref[_i];
+        fonts.filter(font);
+      }
+      self.things += fonts.count;
       return self;
     };
 
