@@ -2,9 +2,9 @@
 
 /*
     Author:         Amsul - http://amsul.ca
-    Version:        0.2.0
+    Version:        0.3.0
     Created on:     19/08/2012
-    Last Updated:   19 August, 2012
+    Last Updated:   20 August, 2012
 */
 
 
@@ -35,16 +35,6 @@
 
     self = {};
 
-    /* Easy access for shizzle
-    */
-
-
-    self.progress = 0;
-
-    self.things = 0;
-
-    self.thingsLoaded = 0;
-
     /*
         Load all the things!
         ========================================================================
@@ -52,124 +42,79 @@
 
 
     Load.allTheThings = function(options) {
+      var thingType, _i, _len, _ref;
+      if (!options.thingsToLoad) {
+        return Load;
+      }
       Load.elemProgress = options.progressId ? document.getElementById(options.progressId) : null;
       Load.elemThings = options.thingsId ? document.getElementById(options.thingsId) : null;
       Load.elemThingsLoaded = options.thingsLoadedId ? document.getElementById(options.thingsLoadedId) : null;
-      self.loadImages().loadFonts().loadingStarted();
-      /*
-              ## if it's an object
-              if things and typeof things is 'object' and Object.prototype.toString.call( things ) is '[object Object]'
-                  
-                  ## try loading the things
-                  self.tryLoading things
-      
-              ## otherwise just return
-              else
-                  console.log( things, 'not object' )
-                  return Load
-      */
-
+      _ref = options.thingsToLoad;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        thingType = _ref[_i];
+        self.loadThings(thingType);
+      }
+      self.loadingStarted();
       return Load;
     };
 
     /*
-        Load all the images with `data-src`
+        Load things based on type of things
         ========================================================================
     */
 
 
-    self.loadImages = function() {
-      var image, images, _i, _len, _ref;
-      images = {};
-      images.all = document.querySelectorAll('img');
-      images.count = 0;
-      images.filter = function(image) {
-        if (image.dataset && image.dataset.src) {
-          images.load(image);
+    self.loadThings = function(type) {
+      var selector, thing, things, _i, _len, _ref;
+      things = {};
+      selector = (function() {
+        switch (type) {
+          case 'images':
+            return 'img';
+          case 'fonts':
+            return 'font';
+          case 'css':
+            return 'link';
+          case 'js':
+            return 'script';
+          case 'doc':
+            return 'section';
+          default:
+            throw 'Thing type \'' + type + '\' is unknown';
         }
-        return images;
+      })();
+      things.all = document.querySelectorAll(selector);
+      things.count = 0;
+      things.filter = function(thing) {
+        if (thing.dataset && thing.dataset.src) {
+          things.load(thing);
+        }
+        return things;
       };
-      images.load = function(image) {
-        var onError, onLoad, onReadyStateChange, removeHandlers;
-        onLoad = function(e) {
-          removeHandlers();
-          self.thingLoaded();
-        };
-        onReadyStateChange = function(e) {
-          if (image.readyState === 'complete') {
-            removeHandlers();
+      things.load = function(thing) {
+        var font;
+        things.count += 1;
+        if (type === 'fonts') {
+          font = new Font();
+          self.addHandlers(font, type);
+          font.fontFamily = thing.dataset.family;
+          font.src = thing.dataset.src;
+        } else {
+          self.addHandlers(thing, type);
+          if (type === 'css') {
+            thing.href = thing.dataset.src;
+          } else {
+            thing.src = thing.dataset.src;
           }
-          console.log('onReadyStateChange', e);
-        };
-        onError = function(e) {
-          removeHandlers();
-          console.log('onError', e);
-        };
-        removeHandlers = function() {
-          self.unbind(image, 'load', onLoad).unbind(image, 'readyStateChange', onReadyStateChange).unbind(image, 'error', onError);
-        };
-        images.count += 1;
-        self.bind(image, 'load', onLoad).bind(image, 'readyStateChange', onReadyStateChange).bind(image, 'error', onError);
-        image.src = image.dataset.src;
-        return images;
-      };
-      _ref = images.all;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        image = _ref[_i];
-        images.filter(image);
-      }
-      self.things += images.count;
-      return self;
-    };
-
-    /*
-        Load all the fonts with `data-src`
-        ========================================================================
-    */
-
-
-    self.loadFonts = function() {
-      var font, fonts, _i, _len, _ref;
-      fonts = {};
-      fonts.all = document.querySelectorAll('font');
-      fonts.count = 0;
-      fonts.filter = function(font) {
-        if (font.dataset && font.dataset.src) {
-          fonts.load(font);
         }
-        return fonts;
+        return things;
       };
-      fonts.load = function(font) {
-        var newFont, onError, onLoad, removeHandlers;
-        newFont = new Font();
-        onLoad = function(e) {
-          removeHandlers();
-          self.thingLoaded();
-          console.log('here', e, newFont);
-        };
-        onError = function(e) {
-          removeHandlers();
-          console.log('onError', e);
-        };
-        removeHandlers = function() {
-          newFont.onload = function() {};
-          newFont.onerror = function() {};
-        };
-        fonts.count += 1;
-        newFont.onload = onLoad;
-        newFont.onerror = onError;
-        newFont.fontFamily = font.dataset.family;
-        newFont.src = font.dataset.src;
-        font.style.fontFamily = font.dataset.family.replace(/\ /g, '\\ ');
-        console.dir(font);
-        return fonts;
-      };
-      _ref = fonts.all;
+      _ref = things.all;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        font = _ref[_i];
-        fonts.filter(font);
+        thing = _ref[_i];
+        things.filter(thing);
       }
-      self.things += fonts.count;
+      self.THINGS += things.count;
       return self;
     };
 
@@ -190,19 +135,99 @@
     };
 
     /*
+        Add and remove handlers
+        ========================================================================
+    */
+
+
+    self.addHandlers = function(thing, type) {
+      var onError, onLoad, request;
+      if (type === 'images' || type === 'css' || type === 'js') {
+        self.commonHandlers(thing, type);
+      } else if (type === 'fonts') {
+        onLoad = function() {
+          self.removeHandlers(thing, type).thingLoaded();
+        };
+        onError = function() {
+          self.removeHandlers(thing, type);
+          console.log('onError', thing, type);
+        };
+        thing.onload = onLoad;
+        thing.onerror = onError;
+      } else if (type === 'doc') {
+        request = new XMLHttpRequest();
+        request.onload = function(e) {
+          self.removeHandlers(request, type).thingLoaded(thing, type, request.responseText);
+        };
+        request.onreadystatechange = function(e) {
+          if (request.readyState === 4 && request.status === 200) {
+            self.removeHandlers(request, type).thingLoaded(thing, type, request.responseText);
+          }
+        };
+        request.onerror = function() {
+          self.removeHandlers(request, type);
+          console.log('onerror', thing, type);
+        };
+        request.open('GET', thing.dataset.src, true);
+        request.send();
+      } else {
+        console.log('no add handler', thing, type);
+      }
+      return self;
+    };
+
+    self.removeHandlers = function(thing, type) {
+      if (type === 'images' || type === 'css' || type === 'js') {
+        self.unbind(thing, 'load', thing.onLoad).unbind(thing, 'readyStateChange', thing.onReadyStateChange).unbind(thing, 'error', thing.onError);
+      } else if (type === 'fonts') {
+        thing.onload = function() {};
+        thing.onerror = function() {};
+      } else if (type === 'doc') {
+        thing.onload = function() {};
+        thing.onreadystatechange = function() {};
+        thing.onerror = function() {};
+      } else {
+        console.log('no remove handler', thing, type);
+      }
+      return self;
+    };
+
+    self.commonHandlers = function(thing, type) {
+      var onError, onLoad, onReadyStateChange;
+      onLoad = function(e) {
+        self.removeHandlers(thing, type).thingLoaded();
+      };
+      onReadyStateChange = function(e) {
+        if (thing.readyState === 'complete') {
+          self.removeHandlers(thing, type).thingLoaded();
+        }
+        console.log('onReadyStateChange', e);
+      };
+      onError = function(e) {
+        self.removeHandlers(thing, type);
+        console.log('onError', e);
+      };
+      self.bind(thing, 'load', onLoad).bind(thing, 'readyStateChange', onReadyStateChange).bind(thing, 'error', onError);
+      return self;
+    };
+
+    /*
         Update the progress as things load
         ========================================================================
     */
 
 
-    self.thingLoaded = function() {
-      self.thingsLoaded += 1;
-      self.progress = self.thingsLoaded / self.things * 100;
+    self.thingLoaded = function(thing, type, content) {
+      self.THINGS_LOADED += 1;
+      self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100;
       if (Load.elemProgress) {
-        Load.elemProgress.innerHTML = self.progress;
+        Load.elemProgress.innerHTML = self.PROGRESS;
       }
       if (Load.elemThingsLoaded) {
-        Load.elemThingsLoaded.innerHTML = self.thingsLoaded;
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
+      }
+      if (type === 'doc') {
+        thing.innerHTML = content;
       }
       return self;
     };
@@ -215,80 +240,16 @@
 
     self.loadingStarted = function() {
       if (Load.elemThings) {
-        Load.elemThings.innerHTML = self.things;
+        Load.elemThings.innerHTML = self.THINGS;
       }
       if (Load.elemThingsLoaded) {
-        Load.elemThingsLoaded.innerHTML = self.thingsLoaded;
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }
       if (Load.elemProgress) {
-        Load.elemProgress.innerHTML = self.progress;
+        Load.elemProgress.innerHTML = self.PROGRESS;
       }
       return self;
     };
-
-    /*
-        Try loading the things passed
-        ======================================================================== ## #
-    
-        self.tryLoading = ( things ) ->
-    
-            doTrial = ( type, thing ) ->
-    
-                try
-                    Load.get[ type ] thing
-                
-                catch error
-                    #console.log error, ' .. warning bro. there\'s no \'' + type + '\' loader'
-    
-    
-            ## try loading the thing based on type
-            doTrial type, thing for own type, thing of things
-    
-            return self
-    
-        #checkThings
-    
-    
-    
-        ## #
-        Load in things
-        ======================================================================== ## #
-    
-        Load.get =
-    
-            ## load some images
-            images: ( thing ) ->
-    
-    
-                ## if the thing is an array
-    
-                if thing and typeof thing is 'object' and Object.prototype.toString.call thing is '[object Array]'
-                    console.log 'this is an array', thing
-    
-    
-                ## if the thing is a string
-    
-                else if typeof thing is 'string'
-                    self.loadImage thing
-    
-    
-                else console.log 'some other thing', thing
-    
-        #get
-    
-    
-    
-        ## #
-        Load images
-        ======================================================================== ## #
-    
-        self.loadImage = ( url ) ->
-    
-            console.log 'url', url
-    
-            return self
-    */
-
 
     /*
         Intialize the loading
@@ -296,17 +257,12 @@
     */
 
 
-    Load.initialize = (function() {
+    self.initialize = (function() {
+      self.PROGRESS = 0;
+      self.THINGS = 0;
+      self.THINGS_LOADED = 0;
       window.Load = Load;
-      Load.allTheThings({
-        'asdf': ['asdfasdf', 333, 'lol'],
-        'images': 'homer.png',
-        'fonts': ['asfd.ttf', 'loler.woff'],
-        'progressId': 'progress',
-        'thingsId': 'things',
-        'thingsLoadedId': 'things_loaded'
-      });
-      return Load;
+      return self;
     })();
 
     return Load;
@@ -314,82 +270,15 @@
   })();
 
   /*
-  `
-  / * ==========================================================================
-  
-      APP stuff begins
-  
-  ========================================================================== * /
-  
-  (function($, window, document, undefined) {
-  
-      'use strict';
-  
-      var
-  
-          / *
-              Globals
-          ======================================================================== * /
-  
-          $window = $( window ),
-          $APP = $( '#APP' ),
-  
-  
-          / *
-              APP
-          ======================================================================== * /
-  
-          APP = (function app() {
-  
-              var self = {}
-  
-  
-  
-              / *
-                  Do stuff with the app
-              ======================================================================== * /
-  
-              app.do_something = function() {
-  
-                  
-  
-                  return app
-              }
-  
-  
-  
-  
-  
-              / *
-                  Start up the app
-              ========================================================================== * /
-  
-              self.start = function() {
-  
-  
-  
-                  return self
-              } // start
-  
-  
-  
-              return app
-          })() // APP
-  
-  
-  
-  
-  
-  
-      / *
-          Start 'er up!
-      ======================================================================== * /
-  
-      APP.start()
-  
-  
-  })(jQuery, window, document)`
+  APP functionality goes here
   */
 
+
+  Load.allTheThings({
+    'thingsToLoad': ['images', 'fonts', 'css', 'js', 'doc'],
+    'progressId': 'progress',
+    'thingsId': 'things',
+    'thingsLoadedId': 'things_loaded'
+  });
 
 }).call(this);

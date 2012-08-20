@@ -1,23 +1,37 @@
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" data-src="http://html5boilerplate.com/css/style.css?v3launch">
+
+<script data-src="http://code.jquery.com/jquery-1.8.0.js"></script>
 
 <section class="wrapper">
 
 
-	<p>Load All The Things</p>
-	<p>Progress <strong id="progress"></strong>%</p>
-	<p>Things to load <strong id="things"></strong></p>
-	<p>Things loaded <strong id="things_loaded"></strong></p>
+	<h4>Load.allTheThings.js</h4>
+
+	<ul class="wrapper">
+		<li>Progress <strong id="progress"></strong>%</li>
+		<li>Things to load <strong id="things"></strong></li>
+		<li>Things loaded <strong id="things_loaded"></strong></li>
+	</ul>
 
 
-	<hr><br>
+	<br><hr><br>
 
 
 	<section class="holder-fonts">
 		<ol>
-			<li><font data-family="Font 01" data-src="media/akzidenz.ttf">Custom font family</font></li>
-			<li><font data-family="Font 02" data-src="media/governor.ttf">Custom font family</font></li>
-			<li><font data-family="Font 03" data-src="media/varela.ttf">Custom font family</font></li>
+			<li><font data-family="Font 01" data-src="media/akzidenz.ttf"></font><span class="font-akzidenz">Custom font family</span></li>
+			<li><font data-family="Font 02" data-src="media/governor.ttf"></font><span class="font-governor">Custom font family</span></li>
+			<li><font data-family="Font 03" data-src="media/varela.ttf"></font><span class="font-varela">Custom font family</span></li>
 		</ol>
+	</section>
+
+
+	<br><hr><br><br>
+
+
+	<section class="holder-html">
+		<section data-src="media/ajaxed_page.htm"></section>
 	</section>
 
 
@@ -28,8 +42,8 @@
 		<!--<figure><img src="http://wecodestuff.co/static/media/homer.png" alt=""></figure>-->
 		<figure><img data-src="http://wecodestuff.co/static/media/high_five.jpg"></figure>
 		<figure><img data-src="http://wecodestuff.co/static/media/homer.png"></figure>
-		<!--<figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>-->
-		<!--<figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>-->
+		<figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>
+		<figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>
 		<!--<figure><img data-src="http://wecodestuff.co/static/media/ship_it.jpg"></figure>-->
 	</section>
 
@@ -39,6 +53,6 @@
 
 </section>
 
-<!--<script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>-->
+
 <script src="Font.js"></script>
 <script src="Load.allTheThings.js"></script>
