@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.3.0 - 21 August, 2012
+    Load.allTheThings v0.4.0 - 21 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -36,7 +36,8 @@
 
 
 (function() {
-  var Load;
+  var Load,
+    __hasProp = {}.hasOwnProperty;
 
   Load = (function() {
     var self;
@@ -52,23 +53,62 @@
 
 
     Load.allTheThings = function(options) {
-      var thingType, _i, _len, _ref;
-      if (!options.thingsToLoad) {
-        return Load;
-      }
+      self.beginLoading(options);
+      return Load;
+    };
+
+    /*
+        When loading begins, do some things
+        ========================================================================
+    */
+
+
+    self.beginLoading = function(options) {
+      var key, thingType, value, _i, _len, _ref, _ref1;
       self.PROGRESS = 0;
       self.THINGS = 0;
       self.THINGS_LOADED = 0;
-      Load.elemProgress = options.progressId ? document.getElementById(options.progressId) : null;
-      Load.elemThings = options.thingsId ? document.getElementById(options.thingsId) : null;
-      Load.elemThingsLoaded = options.thingsLoadedId ? document.getElementById(options.thingsLoadedId) : null;
-      _ref = options.thingsToLoad;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        thingType = _ref[_i];
+      options = options || {};
+      Load.options = options;
+      self.defaults = {
+        thingsToLoad: ['images', 'fonts', 'css', 'js', 'html'],
+        progressId: null,
+        thingsId: null,
+        thingsLoadedId: null,
+        onError: function(thing) {
+          return Load;
+        },
+        onLoad: function(thing) {
+          return Load;
+        },
+        onComplete: function() {
+          return Load;
+        }
+      };
+      _ref = self.defaults;
+      for (key in _ref) {
+        if (!__hasProp.call(_ref, key)) continue;
+        value = _ref[key];
+        Load.options[key] = options[key] || value;
+      }
+      Load.elemProgress = Load.options.progressId ? document.getElementById(Load.options.progressId) : null;
+      Load.elemThings = Load.options.thingsId ? document.getElementById(Load.options.thingsId) : null;
+      Load.elemThingsLoaded = Load.options.thingsLoadedId ? document.getElementById(Load.options.thingsLoadedId) : null;
+      if (Load.elemThingsLoaded) {
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
+      }
+      if (Load.elemProgress) {
+        Load.elemProgress.innerHTML = self.PROGRESS;
+      }
+      _ref1 = Load.options.thingsToLoad;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        thingType = _ref1[_i];
         self.loadThings(thingType);
       }
-      self.loadingStarted();
-      return Load;
+      if (Load.elemThings) {
+        Load.elemThings.innerHTML = self.THINGS;
+      }
+      return self;
     };
 
     /*
@@ -90,7 +130,7 @@
             return 'link';
           case 'js':
             return 'script';
-          case 'doc':
+          case 'html':
             return 'section';
           default:
             throw 'Thing type \'' + type + '\' is unknown';
@@ -132,6 +172,42 @@
     };
 
     /*
+        Update the progress as things load
+        ========================================================================
+    */
+
+
+    self.thingLoaded = function(thing, type, content) {
+      self.THINGS_LOADED += 1;
+      self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100;
+      if (Load.elemProgress) {
+        Load.elemProgress.innerHTML = self.PROGRESS;
+      }
+      if (Load.elemThingsLoaded) {
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
+      }
+      if (type === 'html') {
+        thing.innerHTML = content;
+      }
+      Load.options.onLoad(thing);
+      if (self.THINGS_LOADED === self.THINGS) {
+        self.loadComplete();
+      }
+      return self;
+    };
+
+    /*
+        Update the progress as things load
+        ========================================================================
+    */
+
+
+    self.loadComplete = function() {
+      Load.options.onComplete();
+      return self;
+    };
+
+    /*
         Bind and unbind some events
         ========================================================================
     */
@@ -159,15 +235,15 @@
         self.commonHandlers(thing, type);
       } else if (type === 'fonts') {
         onLoad = function() {
-          self.removeHandlers(thing, type).thingLoaded();
+          self.removeHandlers(thing, type).thingLoaded(thing, type);
         };
         onError = function() {
           self.removeHandlers(thing, type);
-          console.log('onError', thing, type);
+          Load.options.onError(thing);
         };
         thing.onload = onLoad;
         thing.onerror = onError;
-      } else if (type === 'doc') {
+      } else if (type === 'html') {
         request = new XMLHttpRequest();
         request.onload = function(e) {
           self.removeHandlers(request, type).thingLoaded(thing, type, request.responseText);
@@ -195,7 +271,7 @@
       } else if (type === 'fonts') {
         thing.onload = function() {};
         thing.onerror = function() {};
-      } else if (type === 'doc') {
+      } else if (type === 'html') {
         thing.onload = function() {};
         thing.onreadystatechange = function() {};
         thing.onerror = function() {};
@@ -208,59 +284,19 @@
     self.commonHandlers = function(thing, type) {
       var onError, onLoad, onReadyStateChange;
       onLoad = function(e) {
-        self.removeHandlers(thing, type).thingLoaded();
+        self.removeHandlers(thing, type).thingLoaded(thing, type);
       };
       onReadyStateChange = function(e) {
         if (thing.readyState === 'complete') {
-          self.removeHandlers(thing, type).thingLoaded();
+          self.removeHandlers(thing, type).thingLoaded(thing, type);
         }
         console.log('onReadyStateChange', e);
       };
       onError = function(e) {
         self.removeHandlers(thing, type);
-        console.log('onError', e);
+        Load.options.onError(thing);
       };
       self.bind(thing, 'load', onLoad).bind(thing, 'readyStateChange', onReadyStateChange).bind(thing, 'error', onError);
-      return self;
-    };
-
-    /*
-        Update the progress as things load
-        ========================================================================
-    */
-
-
-    self.thingLoaded = function(thing, type, content) {
-      self.THINGS_LOADED += 1;
-      self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100;
-      if (Load.elemProgress) {
-        Load.elemProgress.innerHTML = self.PROGRESS;
-      }
-      if (Load.elemThingsLoaded) {
-        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
-      }
-      if (type === 'doc') {
-        thing.innerHTML = content;
-      }
-      return self;
-    };
-
-    /*
-        After all the things have started loading
-        ========================================================================
-    */
-
-
-    self.loadingStarted = function() {
-      if (Load.elemThings) {
-        Load.elemThings.innerHTML = self.THINGS;
-      }
-      if (Load.elemThingsLoaded) {
-        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
-      }
-      if (Load.elemProgress) {
-        Load.elemProgress.innerHTML = self.PROGRESS;
-      }
       return self;
     };
 

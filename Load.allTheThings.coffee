@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.3.0 - 21 August, 2012
+    Load.allTheThings v0.4.0 - 21 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -29,6 +29,8 @@
 ###jshint debug: true, browser: true, devel: true, curly: false, forin: false, nonew: true, plusplus: false###
 
 
+## TODO: add a method to clean up after a thing is loaded
+
 
 class Load
 
@@ -42,30 +44,68 @@ class Load
 
     Load.allTheThings = ( options ) ->
 
-        ## get things to load from options
-        return Load if not options.thingsToLoad
+        ## begin loading things based on options
+        self.beginLoading( options )
+
+        return Load
+    #allTheThings
 
 
-        ## private counts of things
+    ###
+    When loading begins, do some things
+    ======================================================================== ###
+
+    self.beginLoading = ( options ) ->
+
+        ## keep a private counts of things
         self.PROGRESS = 0
         self.THINGS = 0
         self.THINGS_LOADED = 0
 
 
-        ## store the progress elem
-        Load.elemProgress = if options.progressId then document.getElementById options.progressId else null
-        Load.elemThings = if options.thingsId then document.getElementById options.thingsId else null
-        Load.elemThingsLoaded = if options.thingsLoadedId then document.getElementById options.thingsLoadedId else null
+        ## in case no options are passed
+        options = options || {}
+
+        ## store the options
+        Load.options = options
 
 
-        ## go through the things to load
-        self.loadThings thingType for thingType in options.thingsToLoad
+        ## default options
+        self.defaults =
+            thingsToLoad:           ['images', 'fonts', 'css', 'js', 'html']
+            progressId:             null
+            thingsId:               null
+            thingsLoadedId:         null
+            onError:                ( thing ) -> return Load
+            onLoad:                 ( thing ) -> return Load
+            onComplete:             -> return Load
 
-        ## do stuff after all the things have started loading
-        self.loadingStarted()
 
-        return Load
-    #allTheThings
+        ## check the options and merge with the defaults
+        for own key, value of self.defaults
+            Load.options[ key ] = options[ key ] || value
+
+
+        ## store the elements that will need UI updates
+        Load.elemProgress = if Load.options.progressId then document.getElementById Load.options.progressId else null
+        Load.elemThings = if Load.options.thingsId then document.getElementById Load.options.thingsId else null
+        Load.elemThingsLoaded = if Load.options.thingsLoadedId then document.getElementById Load.options.thingsLoadedId else null
+
+
+        # put in all the initial counts
+        if Load.elemThingsLoaded then Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED
+        if Load.elemProgress then Load.elemProgress.innerHTML = self.PROGRESS
+
+
+        ## go through the things and begin loading
+        self.loadThings thingType for thingType in Load.options.thingsToLoad
+
+
+        ## update the UI with the final count of things
+        if Load.elemThings then Load.elemThings.innerHTML = self.THINGS
+
+        return self
+
 
 
 
@@ -84,7 +124,7 @@ class Load
                 when 'fonts' then 'font'
                 when 'css' then 'link'
                 when 'js' then 'script'
-                when 'doc' then 'section'
+                when 'html' then 'section'
                 else throw 'Thing type \'' + type + '\' is unknown'
         )()
 
@@ -144,6 +184,49 @@ class Load
 
 
 
+    ###
+    Update the progress as things load
+    ======================================================================== ###
+
+    self.thingLoaded = ( thing, type, content ) ->
+
+        ## update the counts
+        self.THINGS_LOADED += 1
+        self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100
+
+
+        ## update the UI
+        Load.elemProgress.innerHTML = self.PROGRESS if Load.elemProgress
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
+
+        thing.innerHTML = content if type is 'html'
+
+
+        ## do stuff when this thing is loaded
+        Load.options.onLoad thing
+
+        ## do stuff when all the things are loaded
+        self.loadComplete() if self.THINGS_LOADED is self.THINGS
+
+        return self
+
+
+
+
+    ###
+    Update the progress as things load
+    ======================================================================== ###
+
+    self.loadComplete = ->
+
+        ## invoke the oncomplete option
+        Load.options.onComplete()
+
+        return self
+
+
+
+
 
     ###
     Bind and unbind some events
@@ -174,19 +257,19 @@ class Load
             ## event handlers
             onLoad = ->
                 self.
-                    removeHandlers(thing, type).
-                    thingLoaded()
+                    removeHandlers( thing, type ).
+                    thingLoaded( thing, type )
                 return
 
             onError = ->
                 self.removeHandlers thing, type
-                console.log( 'onError', thing, type )
+                Load.options.onError( thing )
                 return
 
             thing.onload = onLoad
             thing.onerror = onError
 
-        else if type is 'doc'
+        else if type is 'html'
 
             ## create a doc request
             request = new XMLHttpRequest()
@@ -230,7 +313,7 @@ class Load
             thing.onload = ->
             thing.onerror = ->
 
-        else if type is 'doc'
+        else if type is 'html'
             thing.onload = ->
             thing.onreadystatechange = ->
             thing.onerror = ->
@@ -244,21 +327,21 @@ class Load
 
         onLoad = ( e ) ->
             self.
-                removeHandlers(thing, type).
-                thingLoaded()
+                removeHandlers( thing, type ).
+                thingLoaded( thing, type )
             return
 
         onReadyStateChange = ( e ) ->
             if thing.readyState is 'complete'
                 self.
-                    removeHandlers(thing, type).
-                    thingLoaded()
+                    removeHandlers( thing, type ).
+                    thingLoaded( thing, type )
             console.log( 'onReadyStateChange', e )
             return
 
         onError = ( e ) ->
             self.removeHandlers thing, type
-            console.log( 'onError', e )
+            Load.options.onError( thing )
             return
 
         self.
@@ -267,45 +350,6 @@ class Load
             bind( thing, 'error', onError )
 
         return self
-
-
-
-
-
-    ###
-    Update the progress as things load
-    ======================================================================== ###
-
-    self.thingLoaded = ( thing, type, content ) ->
-
-        ## update the counts
-        self.THINGS_LOADED += 1
-        self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100
-
-        ## update the UI
-        if Load.elemProgress then Load.elemProgress.innerHTML = self.PROGRESS
-        if Load.elemThingsLoaded then Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED
-
-        if type is 'doc' then thing.innerHTML = content
-
-        return self
-
-
-
-
-    ###
-    After all the things have started loading
-    ======================================================================== ###
-
-    self.loadingStarted = ->
-
-        # put in all the initial counts
-        if Load.elemThings then Load.elemThings.innerHTML = self.THINGS
-        if Load.elemThingsLoaded then Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED
-        if Load.elemProgress then Load.elemProgress.innerHTML = self.PROGRESS
-
-        return self
-
 
 
 

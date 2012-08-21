@@ -49,8 +49,8 @@
         <!--<figure><img src="http://wecodestuff.co/static/media/homer.png" alt=""></figure>-->
         <figure><img data-src="http://wecodestuff.co/static/media/high_five.jpg"></figure>
         <figure><img data-src="http://wecodestuff.co/static/media/homer.png"></figure>
-        <figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>
-        <figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>
+        <!--<figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>-->
+        <!--<figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>-->
         <!--<figure><img data-src="http://wecodestuff.co/static/media/ship_it.jpg"></figure>-->
     </section>
 
@@ -64,12 +64,28 @@
 <script src="../Load.fonts/Load.fonts.js"></script>
 <script src="Load.allTheThings.js"></script>
 <script type="text/javascript">
+    var onError = function( thing ) {
+            console.log( 'this errord out', this, thing )
+        },
+        onComplete = function() {
+            console.log( 'this is done', this )
+        },
+        onLoad = function( thing ) {
+            console.log( thing, 'loaded' )
+        }
+/*
     Load.allTheThings({
-        thingsToLoad: ['images', 'fonts', 'css', 'js', 'doc'],
+        thingsToLoad: ['images', 'fonts', 'css', 'js', 'html']
+    });*/
+    Load.allTheThings({
+        thingsToLoad: [ 'fonts', 'html', 'css' ],
         progressId: 'progress',
         thingsId: 'things',
-        thingsLoadedId: 'things_loaded'
-    });
+        thingsLoadedId: 'things_loaded',
+        onComplete: onComplete,
+        onLoad: onLoad,
+        onError: onError
+    })
 </script>
 
 
