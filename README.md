@@ -3,13 +3,10 @@
 Load.allTheThings
 =================
 
-Load resources before they are needed on your page with just one simple invocation:
+A simple JavaScript library to preload resources as they are needed on your page with just one simple invocation:
 
 ```
 Load.allTheThings();
-
-// or the shorthand
-LaTT();
 ```
 <br>
 Current build: _alpha_ v0.3.0 – 21 August, 2012
@@ -22,11 +19,10 @@ Current build: _alpha_ v0.3.0 – 21 August, 2012
 - <big>**Fonts**</big> ([more info](#Fonts))
 - <big>**Stylesheets**</big> ([more info](#Stylesheets))
 - <big>**Scripts**</big> ([more info](#Scripts))
-- <big>**Html**</big> ([more info](#Html))
+- <big>**HTML**</big> ([more info](#HTML))
 
 
-<br>
-<div id="API"></div>
+<br><div id="API"></div>
 ## The API
 
 There are a few options available to be passed into your loader:
@@ -42,8 +38,7 @@ options = {
 
 
 
-<br>
-<div id="Images"></div>
+<br><div id="Images"></div>
 ## Images
 
 
@@ -61,19 +56,13 @@ Changes to:
 
 
 
-<br>
-<div id="Images"></div>
-## More coming soon
+<br><div id="Images"></div>
+## More docs
 
-...
+Coming soon...
 
 
 <br><br>
 
 ---
 This code is (c) Amsul Naeem, 2012 – Licensed under the MIT ("expat" flavor) license.
-
-
-
-
-
