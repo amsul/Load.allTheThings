@@ -1,25 +1,34 @@
 ###
-    Author:         Amsul - http://amsul.ca
-    Version:        0.3.0
-    Created on:     19/08/2012
-    Last Updated:   20 August, 2012
+     __                           __                ___    ___  ______  __              ______  __
+    /\ \                         /\ \              /\_ \  /\_ \/\__  _\/\ \            /\__  _\/\ \      __
+    \ \ \        ___      __     \_\ \         __  \//\ \ \//\ \/_/\ \/\ \ \___      __\/_/\ \/\ \ \___ /\_\    ___      __     ____
+     \ \ \  __  / __`\  /'__`\   /'_` \      /'__`\  \ \ \  \ \ \ \ \ \ \ \  _ `\  /'__`\ \ \ \ \ \  _ `\/\ \ /' _ `\  /'_ `\  /',__\
+      \ \ \L\ \/\ \L\ \/\ \L\.\_/\ \L\ \  __/\ \L\.\_ \_\ \_ \_\ \_\ \ \ \ \ \ \ \/\  __/  \ \ \ \ \ \ \ \ \ \/\ \/\ \/\ \L\ \/\__, `\
+       \ \____/\ \____/\ \__/.\_\ \___,_\/\_\ \__/.\_\/\____\/\____\\ \_\ \ \_\ \_\ \____\  \ \_\ \ \_\ \_\ \_\ \_\ \_\ \____ \/\____/
+        \/___/  \/___/  \/__/\/_/\/__,_ /\/_/\/__/\/_/\/____/\/____/ \/_/  \/_/\/_/\/____/   \/_/  \/_/\/_/\/_/\/_/\/_/\/___L\ \/___/
+                                                                                                                         /\____/
+                                                                                                                         \_/__/
+    ==================================================================================================================================
+    ----------------------------------------------------------------------------------------------------------------------------------
+###
+###!
+    Load.allTheThings v0.3.0 - 21 August, 2012
+
+    (c) Amsul Naeem, 2012 - http://amsul.ca
+    Licensed under MIT ("expat" flavour) license.
+    Hosted on http://github.com/amsul/Load.allTheThings
+
+    This library creates a Load object which can be used to
+    preload things before they are needed on your page. It can
+    load images, fonts, stylesheets, scripts, and html.
+
+    To invoke the loader, use Load.allTheThings()
+    For more documentation, check http://github.com/amsul/Load.allTheThings
 ###
 
 ###jshint debug: true, browser: true, devel: true, curly: false, forin: false, nonew: true, plusplus: false###
 
 
-
-###
-==========================================================================
-
-    Load
-    All
-    The
-    Things
-    .js
-
-==========================================================================
-###
 
 class Load
 
@@ -35,6 +44,12 @@ class Load
 
         ## get things to load from options
         return Load if not options.thingsToLoad
+
+
+        ## private counts of things
+        self.PROGRESS = 0
+        self.THINGS = 0
+        self.THINGS_LOADED = 0
 
 
         ## store the progress elem
@@ -91,7 +106,7 @@ class Load
 
             ## update the filtered count
             things.count += 1
-            
+
 
             ## if type is fonts
             if type is 'fonts'
@@ -301,10 +316,9 @@ class Load
 
     self.initialize = (->
 
-        ## private counts of things
-        self.PROGRESS = 0
-        self.THINGS = 0
-        self.THINGS_LOADED = 0
+        ## check if Load.fonts has been attached
+        if not window.Font or not window.Font::isLoadDotFonts
+            throw 'Load.fonts is required for Load.allTheThings to work.'
 
         ## create a global reach
         window.Load = Load
@@ -315,20 +329,6 @@ class Load
 
 
 
-
-
-
-
-###
-APP functionality goes here
-###
-
-Load.allTheThings({
-    'thingsToLoad': [ 'images', 'fonts', 'css', 'js', 'doc' ]
-    'progressId': 'progress'
-    'thingsId': 'things'
-    'thingsLoadedId': 'things_loaded'
-})
 
 
 

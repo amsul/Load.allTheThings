@@ -6,53 +6,75 @@
 <section class="wrapper">
 
 
-	<h4>Load.allTheThings.js</h4>
+    <h4>Load.allTheThings</h4>
 
-	<ul class="wrapper">
-		<li>Progress <strong id="progress"></strong>%</li>
-		<li>Things to load <strong id="things"></strong></li>
-		<li>Things loaded <strong id="things_loaded"></strong></li>
-	</ul>
-
-
-	<br><hr><br>
+    <ul class="wrapper">
+        <li>Progress <strong id="progress"></strong>%</li>
+        <li>Things to load <strong id="things"></strong></li>
+        <li>Things loaded <strong id="things_loaded"></strong></li>
+    </ul>
 
 
-	<section class="holder-fonts">
-		<ol>
-			<li><font data-family="Font 01" data-src="media/akzidenz.ttf"></font><span class="font-akzidenz">Custom font family</span></li>
-			<li><font data-family="Font 02" data-src="media/governor.ttf"></font><span class="font-governor">Custom font family</span></li>
-			<li><font data-family="Font 03" data-src="media/varela.ttf"></font><span class="font-varela">Custom font family</span></li>
-		</ol>
-	</section>
+    <br><hr><br>
 
 
-	<br><hr><br><br>
+    <section class="holder-fonts">
+        <ol>
+
+            <li><font data-family="Font 01" data-src="media/akzidenz.ttf"></font><span class="font-akzidenz">Custom font family</span></li>
+            <li><font data-family="Font 02" data-src="media/governor.ttf"></font><span class="font-governor">Custom font family</span></li>
+            <li><font data-family="Font 03" data-src="media/varela.ttf"></font><span class="font-varela">Custom font family</span></li>
+            <!--
+            <li><font data-family="Helv 01" data-src="media/helvetica-cond.ttf"></font><span class="font-helvetica-01">Custom font family</span></li>
+            <li><font data-family="Helv 01" data-src="media/helvetica-condobl.ttf"></font><span class="font-helvetica-02">Custom font family</span></li>
+            <li><font data-family="Helv 01" data-src="media/helvetica-boldcond.ttf"></font><span class="font-helvetica-03">Custom font family</span></li>
+            <li><font data-family="Helv 01" data-src="media/helvetica-boldcondobl.ttf"></font><span class="font-helvetica-04">Custom font family</span></li>
+            -->
+        </ol>
+    </section>
 
 
-	<section class="holder-html">
-		<section data-src="media/ajaxed_page.htm"></section>
-	</section>
+    <br><hr><br><br>
 
 
-	<br><hr><br><br>
+    <section class="holder-html">
+        <section data-src="media/ajaxed_page.htm"></section>
+    </section>
 
 
-	<section class="holder-images">
-		<!--<figure><img src="http://wecodestuff.co/static/media/homer.png" alt=""></figure>-->
-		<figure><img data-src="http://wecodestuff.co/static/media/high_five.jpg"></figure>
-		<figure><img data-src="http://wecodestuff.co/static/media/homer.png"></figure>
-		<figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>
-		<figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>
-		<!--<figure><img data-src="http://wecodestuff.co/static/media/ship_it.jpg"></figure>-->
-	</section>
+    <br><hr><br><br>
 
 
-	<br><br><br>
+    <section class="holder-images">
+        <!--<figure><img src="http://wecodestuff.co/static/media/homer.png" alt=""></figure>-->
+        <figure><img data-src="http://wecodestuff.co/static/media/high_five.jpg"></figure>
+        <figure><img data-src="http://wecodestuff.co/static/media/homer.png"></figure>
+        <figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>
+        <figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>
+        <!--<figure><img data-src="http://wecodestuff.co/static/media/ship_it.jpg"></figure>-->
+    </section>
+
+
+    <br><br><br>
 
 
 </section>
 
 
-<script src="Font.js"></script>
+<script src="../Load.fonts/Load.fonts.js"></script>
 <script src="Load.allTheThings.js"></script>
+<script type="text/javascript">
+    Load.allTheThings({
+        thingsToLoad: ['images', 'fonts', 'css', 'js', 'doc'],
+        progressId: 'progress',
+        thingsId: 'things',
+        thingsLoadedId: 'things_loaded'
+    });
+</script>
+
+
+
+
+
+
+

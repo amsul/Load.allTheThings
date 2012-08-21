@@ -43,6 +43,31 @@ img {
 
 
 
+.font-helvetica-01,
+.font-helvetica-02,
+.font-helvetica-03,
+.font-helvetica-04 {
+    font-family: 'Helv 01';
+    font-weight: normal;
+    font-style: normal;
+}
+
+.font-helvetica-02 {
+    font-style: italic;
+}
+
+.font-helvetica-03 {
+    font-weight: bold;
+}
+
+.font-helvetica-04 {
+    font-weight: bold;
+    font-style: italic;
+}
+
+
+
+
 
 
 
