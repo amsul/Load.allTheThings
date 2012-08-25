@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.4.0 - 21 August, 2012
+    Load.allTheThings v0.5.0 - 25 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -64,14 +64,15 @@
 
 
     self.beginLoading = function(options) {
-      var key, thingType, value, _i, _len, _ref, _ref1;
+      var context, key, value, _ref;
       self.PROGRESS = 0;
       self.THINGS = 0;
       self.THINGS_LOADED = 0;
       options = options || {};
       Load.options = options;
       self.defaults = {
-        thingsToLoad: ['images', 'fonts', 'css', 'js', 'html'],
+        thingsToLoad: ['images', 'fonts', 'css', 'js', 'html', 'data'],
+        within: null,
         progressId: null,
         thingsId: null,
         thingsLoadedId: null,
@@ -100,10 +101,23 @@
       if (Load.elemProgress) {
         Load.elemProgress.innerHTML = self.PROGRESS;
       }
-      _ref1 = Load.options.thingsToLoad;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        thingType = _ref1[_i];
-        self.loadThings(thingType);
+      context = (function() {
+        var selector;
+        selector = Load.options.within;
+        if (selector) {
+          if (selector.match(/^#/)) {
+            return document.getElementById(selector.replace(/^#/, ''));
+          } else if (selector.match(/^\./)) {
+            return document.getElementsByClassName(selector.replace(/^\./, ''));
+          } else {
+            return document.querySelectorAll(selector);
+          }
+        } else {
+          return document;
+        }
+      })();
+      if (context) {
+        self.loadAllThingsWithin(context);
       }
       if (Load.elemThings) {
         Load.elemThings.innerHTML = self.THINGS;
@@ -112,14 +126,40 @@
     };
 
     /*
-        Load things based on type of things
+        Add things to a collection to be loaded
         ========================================================================
     */
 
 
-    self.loadThings = function(type) {
-      var selector, thing, things, _i, _len, _ref;
-      things = {};
+    self.loadAllThingsWithin = function(context) {
+      var node, type, _i, _j, _len, _len1, _ref;
+      self.collectionOfNodes = [];
+      self.collectionOfThings = [];
+      if (context.constructor.name === 'NodeList') {
+        for (_i = 0, _len = context.length; _i < _len; _i++) {
+          node = context[_i];
+          self.collectionOfNodes.push(node);
+        }
+      } else {
+        self.collectionOfNodes.push(context);
+      }
+      _ref = Load.options.thingsToLoad;
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        type = _ref[_j];
+        self.findThings(self.collectionOfNodes, type);
+      }
+      self.THINGS += self.collectionOfThings.length;
+      return self;
+    };
+
+    /*
+        Find things to load in a collection
+        ========================================================================
+    */
+
+
+    self.findThings = function(collection, type) {
+      var node, selector, things, _i, _len;
       selector = (function() {
         switch (type) {
           case 'images':
@@ -132,42 +172,62 @@
             return 'script';
           case 'html':
             return 'section';
+          case 'data':
+            return 'code';
           default:
             throw 'Thing type \'' + type + '\' is unknown';
         }
       })();
-      things.all = document.querySelectorAll(selector);
-      things.count = 0;
-      things.filter = function(thing) {
-        if (thing.dataset && thing.dataset.src) {
-          things.load(thing);
+      for (_i = 0, _len = collection.length; _i < _len; _i++) {
+        node = collection[_i];
+        things = node.querySelectorAll(selector);
+        if (things.length) {
+          self.filterAndLoad(things, type);
         }
-        return things;
-      };
-      things.load = function(thing) {
-        var font;
-        things.count += 1;
-        if (type === 'fonts') {
-          font = new Font();
-          self.addHandlers(font, type);
-          font.fontFamily = thing.dataset.family;
-          font.src = thing.dataset.src;
-        } else {
-          self.addHandlers(thing, type);
-          if (type === 'css') {
-            thing.href = thing.dataset.src;
-          } else {
-            thing.src = thing.dataset.src;
-          }
-        }
-        return things;
-      };
-      _ref = things.all;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        thing = _ref[_i];
-        things.filter(thing);
       }
-      self.THINGS += things.count;
+      return self;
+    };
+
+    /*
+        Filter things with `data-src` out of a list of things
+        ========================================================================
+    */
+
+
+    self.filterAndLoad = function(things, type) {
+      var thing, _i, _len;
+      for (_i = 0, _len = things.length; _i < _len; _i++) {
+        thing = things[_i];
+        if (thing.dataset && thing.dataset.src) {
+          self.load(thing, type);
+          self.collectionOfThings.push(thing);
+        }
+      }
+      return self;
+    };
+
+    /*
+        Load things based on type of things
+        ========================================================================
+    */
+
+
+    self.load = function(thing, type) {
+      var font, request;
+      if (type === 'fonts') {
+        font = new Font();
+        self.addHandlers(font, type);
+        font.fontFamily = thing.dataset.family;
+        font.src = thing.dataset.src;
+      } else {
+        request = thing.dataset.src;
+        self.addHandlers(thing, type);
+        if (type === 'css') {
+          thing.href = request;
+        } else {
+          thing.src = request;
+        }
+      }
       return self;
     };
 
@@ -177,7 +237,7 @@
     */
 
 
-    self.thingLoaded = function(thing, type, content) {
+    self.thingLoaded = function(thing, type, request) {
       self.THINGS_LOADED += 1;
       self.PROGRESS = self.THINGS_LOADED / self.THINGS * 100;
       if (Load.elemProgress) {
@@ -186,10 +246,10 @@
       if (Load.elemThingsLoaded) {
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }
-      if (type === 'html') {
-        thing.innerHTML = content;
+      if (type === 'html' || type === 'data') {
+        thing.innerHTML = request.responseText;
       }
-      Load.options.onLoad(thing);
+      Load.options.onLoad(thing, type);
       if (self.THINGS_LOADED === self.THINGS) {
         self.loadComplete();
       }
@@ -239,18 +299,18 @@
         };
         onError = function() {
           self.removeHandlers(thing, type);
-          Load.options.onError(thing);
+          Load.options.onError(thing, type);
         };
         thing.onload = onLoad;
         thing.onerror = onError;
-      } else if (type === 'html') {
+      } else if (type === 'html' || type === 'data') {
         request = new XMLHttpRequest();
         request.onload = function(e) {
-          self.removeHandlers(request, type).thingLoaded(thing, type, request.responseText);
+          self.removeHandlers(request, type).thingLoaded(thing, type, request);
         };
         request.onreadystatechange = function(e) {
           if (request.readyState === 4 && request.status === 200) {
-            self.removeHandlers(request, type).thingLoaded(thing, type, request.responseText);
+            self.removeHandlers(request, type).thingLoaded(thing, type, request);
           }
         };
         request.onerror = function() {
@@ -271,7 +331,7 @@
       } else if (type === 'fonts') {
         thing.onload = function() {};
         thing.onerror = function() {};
-      } else if (type === 'html') {
+      } else if (type === 'html' || type === 'data') {
         thing.onload = function() {};
         thing.onreadystatechange = function() {};
         thing.onerror = function() {};
@@ -294,7 +354,7 @@
       };
       onError = function(e) {
         self.removeHandlers(thing, type);
-        Load.options.onError(thing);
+        Load.options.onError(thing, type);
       };
       self.bind(thing, 'load', onLoad).bind(thing, 'readyStateChange', onReadyStateChange).bind(thing, 'error', onError);
       return self;

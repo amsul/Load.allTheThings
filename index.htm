@@ -12,13 +12,29 @@
         <li>Progress <strong id="progress"></strong>%</li>
         <li>Things to load <strong id="things"></strong></li>
         <li>Things loaded <strong id="things_loaded"></strong></li>
+        <li style="list-style:none"><br></li>
+        <li>
+            <strong>Status:</strong>
+            <ul id="status">
+            </ul>
+        </li>
     </ul>
 
 
     <br><hr><br>
 
 
-    <section class="holder-fonts">
+    <div id="context" class="loader">
+        <section class="holder-json">
+            <code data-src="media/data.json"></code>
+        </section>
+    </div>
+
+
+    <br><hr><br>
+
+
+    <section class="holder-fonts loader">
         <ol>
 
             <li><font data-family="Font 01" data-src="media/akzidenz.ttf"></font><span class="font-akzidenz">Custom font family</span></li>
@@ -64,21 +80,20 @@
 <script src="../Load.fonts/Load.fonts.js"></script>
 <script src="Load.allTheThings.js"></script>
 <script type="text/javascript">
-    var onError = function( thing ) {
+    var onError = function( thing, type ) {
             console.log( 'this errord out', this, thing )
+        },
+        onLoad = function( thing, type ) {
+            var status = document.getElementById( 'status' )
+            status.innerHTML += '<li>' + type + ' loaded</li>'
         },
         onComplete = function() {
             console.log( 'this is done', this )
-        },
-        onLoad = function( thing ) {
-            console.log( thing, 'loaded' )
         }
-/*
+
     Load.allTheThings({
-        thingsToLoad: ['images', 'fonts', 'css', 'js', 'html']
-    });*/
-    Load.allTheThings({
-        thingsToLoad: [ 'fonts', 'html', 'css' ],
+        thingsToLoad: [ 'images', 'fonts', 'css', 'js', 'html', 'data' ],
+        within: '.loader',
         progressId: 'progress',
         thingsId: 'things',
         thingsLoadedId: 'things_loaded',

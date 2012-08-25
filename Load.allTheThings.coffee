@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.4.0 - 21 August, 2012
+    Load.allTheThings v0.5.0 - 25 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -29,7 +29,9 @@
 ###jshint debug: true, browser: true, devel: true, curly: false, forin: false, nonew: true, plusplus: false###
 
 
-## TODO: add a method to clean up after a thing is loaded
+## TODO:
+## - add a method to clean up after a thing is loaded
+## - check if thing loaded is valid based on type
 
 
 class Load
@@ -72,7 +74,8 @@ class Load
 
         ## default options
         self.defaults =
-            thingsToLoad:           ['images', 'fonts', 'css', 'js', 'html']
+            thingsToLoad:           [ 'images', 'fonts', 'css', 'js', 'html', 'data' ]
+            within:                 null
             progressId:             null
             thingsId:               null
             thingsLoadedId:         null
@@ -97,8 +100,19 @@ class Load
         if Load.elemProgress then Load.elemProgress.innerHTML = self.PROGRESS
 
 
-        ## go through the things and begin loading
-        self.loadThings thingType for thingType in Load.options.thingsToLoad
+        ## figure out the context
+        context = ( ->
+            selector = Load.options.within
+            if selector
+                if selector.match /^#/ then document.getElementById selector.replace /^#/, ''
+                else if selector.match /^\./ then document.getElementsByClassName selector.replace /^\./, ''
+                else document.querySelectorAll selector
+            else document
+        )()
+
+
+        ## collect all the required things within the context
+        if context then self.loadAllThingsWithin context
 
 
         ## update the UI with the final count of things
@@ -110,14 +124,48 @@ class Load
 
 
     ###
-    Load things based on type of things
+    Add things to a collection to be loaded
     ======================================================================== ###
 
-    self.loadThings = ( type ) ->
+    self.loadAllThingsWithin = ( context ) ->
 
-        things = {}
+        ## collection for context nodes
+        self.collectionOfNodes = []
 
-        ## create a selector
+        ## collection of all the things found
+        self.collectionOfThings = []
+
+
+        ## check if the context is a nodelist
+        if context.constructor.name is 'NodeList'
+
+            ## push all the context elements into a collection
+            self.collectionOfNodes.push node for node in context
+
+
+        ## if it's not a nodelist, just pass into collection
+        else self.collectionOfNodes.push context
+
+
+        ## go through the type of things to load, and find them
+        self.findThings self.collectionOfNodes, type for type in Load.options.thingsToLoad
+
+
+        ## update the count of things
+        self.THINGS += self.collectionOfThings.length
+
+        return self
+
+
+
+
+    ###
+    Find things to load in a collection
+    ======================================================================== ###
+
+    self.findThings = ( collection, type ) ->
+
+        ## create a selector based on type
         selector = ( ->
             switch type
                 when 'images' then 'img'
@@ -125,59 +173,79 @@ class Load
                 when 'css' then 'link'
                 when 'js' then 'script'
                 when 'html' then 'section'
+                when 'data' then 'code'
                 else throw 'Thing type \'' + type + '\' is unknown'
         )()
 
-        ## get things of this type
-        things.all = document.querySelectorAll selector
 
-        ## filtered count
-        things.count = 0
+        ## get things of this type within the collection
+        for node in collection
 
+            ## find the things of this type in this node
+            things = node.querySelectorAll selector
 
-        ## filter the things to only get ones with `data-src`
-        things.filter = ( thing ) ->
-            things.load thing if thing.dataset and thing.dataset.src
-            return things
+            ## if there are matching things
+            self.filterAndLoad things, type if things.length
 
 
-        ## load each filtered thing
-        things.load = ( thing ) ->
-
-            ## update the filtered count
-            things.count += 1
+        return self
 
 
-            ## if type is fonts
-            if type is 'fonts'
-
-                font = new Font()
-
-                ## add the handlers based on type
-                self.addHandlers font, type
-
-                font.fontFamily = thing.dataset.family
-                font.src = thing.dataset.src
 
 
-            ## for things other than fonts
-            else
+    ###
+    Filter things with `data-src` out of a list of things
+    ======================================================================== ###
 
-                ## add the handlers based on type
-                self.addHandlers thing, type
+    self.filterAndLoad = ( things, type ) ->
 
-                if type is 'css' then thing.href = thing.dataset.src
-                else thing.src = thing.dataset.src
+        ## go through the things and filter out ones with `data-src`
+        for thing in things
 
-            return things
+            ## if there is a `data-src`
+            if thing.dataset and thing.dataset.src
+
+                ## begin loading the thing
+                self.load thing, type
+
+                ## put the thing in the collection
+                self.collectionOfThings.push thing
+
+        return self
 
 
-        ## loop through and filter the things
-        things.filter thing for thing in things.all
 
 
-        ## update the things count based on filtered count
-        self.THINGS += things.count
+    ###
+    Load things based on type of things
+    ======================================================================== ###
+
+    self.load = ( thing, type ) ->
+
+
+        ## if type is fonts
+        if type is 'fonts'
+
+            font = new Font()
+
+            ## add the handlers based on type
+            self.addHandlers font, type
+
+            ## set the font family and start to load
+            font.fontFamily = thing.dataset.family
+            font.src = thing.dataset.src
+
+
+        ## for things other than fonts
+        else
+
+            request = thing.dataset.src
+
+            ## add the handlers based on type
+            self.addHandlers thing, type
+
+            if type is 'css' then thing.href = request
+            else thing.src = request
 
         return self
 
@@ -188,7 +256,7 @@ class Load
     Update the progress as things load
     ======================================================================== ###
 
-    self.thingLoaded = ( thing, type, content ) ->
+    self.thingLoaded = ( thing, type, request ) ->
 
         ## update the counts
         self.THINGS_LOADED += 1
@@ -199,11 +267,13 @@ class Load
         Load.elemProgress.innerHTML = self.PROGRESS if Load.elemProgress
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
 
-        thing.innerHTML = content if type is 'html'
+
+        ## insert the response if its html
+        thing.innerHTML = request.responseText if type is 'html' or type is 'data'
 
 
         ## do stuff when this thing is loaded
-        Load.options.onLoad thing
+        Load.options.onLoad thing, type
 
         ## do stuff when all the things are loaded
         self.loadComplete() if self.THINGS_LOADED is self.THINGS
@@ -263,13 +333,13 @@ class Load
 
             onError = ->
                 self.removeHandlers thing, type
-                Load.options.onError( thing )
+                Load.options.onError thing, type
                 return
 
             thing.onload = onLoad
             thing.onerror = onError
 
-        else if type is 'html'
+        else if type is 'html' or type is 'data'
 
             ## create a doc request
             request = new XMLHttpRequest()
@@ -277,14 +347,14 @@ class Load
             request.onload = (e) ->
                 self.
                     removeHandlers(request, type).
-                    thingLoaded( thing, type, request.responseText )
+                    thingLoaded( thing, type, request )
                 return
 
             request.onreadystatechange = (e) ->
                 if request.readyState is 4 and request.status is 200
                     self.
-                        removeHandlers(request, type).
-                        thingLoaded( thing, type, request.responseText )
+                        removeHandlers( request, type ).
+                        thingLoaded( thing, type, request )
                 return
 
             request.onerror = ->
@@ -313,7 +383,7 @@ class Load
             thing.onload = ->
             thing.onerror = ->
 
-        else if type is 'html'
+        else if type is 'html' or type is 'data'
             thing.onload = ->
             thing.onreadystatechange = ->
             thing.onerror = ->
@@ -341,7 +411,7 @@ class Load
 
         onError = ( e ) ->
             self.removeHandlers thing, type
-            Load.options.onError( thing )
+            Load.options.onError thing, type
             return
 
         self.
