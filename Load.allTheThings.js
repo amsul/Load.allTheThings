@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.5.0 - 25 August, 2012
+    Load.allTheThings v0.5.2 - 25 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -246,8 +246,10 @@
       if (Load.elemThingsLoaded) {
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }
-      if (type === 'html' || type === 'data') {
+      if (type === 'html') {
         thing.innerHTML = request.responseText;
+      } else if (type === 'data') {
+        self.addToCache(thing, type, request.responseText);
       }
       Load.options.onLoad(thing, type);
       if (self.THINGS_LOADED === self.THINGS) {
@@ -358,6 +360,36 @@
       };
       self.bind(thing, 'load', onLoad).bind(thing, 'readyStateChange', onReadyStateChange).bind(thing, 'error', onError);
       return self;
+    };
+
+    /*
+        Add a thing to the cache
+        ========================================================================
+    */
+
+
+    self.addToCache = function(thing, type, content) {
+      var item;
+      self.cache = self.cache || {};
+      if (type === 'data') {
+        item = JSON.parse(content);
+        if (thing.dataset && thing.dataset.name) {
+          self.cache[thing.dataset.name] = item;
+        } else {
+          throw 'No name given to this type \'' + type + '\'';
+        }
+      }
+      return self;
+    };
+
+    /*
+        Get a thing from cache
+        ========================================================================
+    */
+
+
+    Load.getCached = function(name) {
+      return self.cache[name];
     };
 
     /*

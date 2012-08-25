@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.5.0 - 25 August, 2012
+    Load.allTheThings v0.5.2 - 25 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -268,8 +268,12 @@ class Load
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
 
 
-        ## insert the response if its html
-        thing.innerHTML = request.responseText if type is 'html' or type is 'data'
+        ## do final stuff depending on type
+        if type is 'html'
+            thing.innerHTML = request.responseText
+
+        else if type is 'data'
+            self.addToCache thing, type, request.responseText
 
 
         ## do stuff when this thing is loaded
@@ -420,6 +424,37 @@ class Load
             bind( thing, 'error', onError )
 
         return self
+
+
+
+
+    ###
+    Add a thing to the cache
+    ======================================================================== ###
+
+    self.addToCache = ( thing, type, content ) ->
+
+        self.cache = self.cache || {}
+
+        if type is 'data'
+
+            ## parse it as json
+            item = JSON.parse content
+
+            if thing.dataset and thing.dataset.name
+                self.cache[ thing.dataset.name ] = item
+
+            else
+                throw 'No name given to this type \'' + type + '\''
+
+        return self
+
+
+    ###
+    Get a thing from cache
+    ======================================================================== ###
+
+    Load.getCached = ( name ) -> self.cache[ name ]
 
 
 
