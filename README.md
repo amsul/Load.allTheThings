@@ -27,7 +27,7 @@ Load.allTheThings()
 <br>
 #### Options
 
-There are a few options available to be passed into your loader. [Read the API](#API) for more details on how to use.
+There are a few options available to be passed into your loader. [Read the API](#the-api) for more details on how to use.
 
 ```
 options = {
