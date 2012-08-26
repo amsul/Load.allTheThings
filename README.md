@@ -16,12 +16,12 @@ Load.allTheThings()
 
 ### Things you can load
 
-- <big>**Images**</big> ([more info](#Images))
-- <big>**Fonts**</big> ([more info](#Fonts))
-- <big>**Stylesheets**</big> ([more info](#Stylesheets))
-- <big>**Scripts**</big> ([more info](#Scripts))
-- <big>**HTML**</big> ([more info](#HTML))
-- <big>**JSON**</big> ([more info](#JSON))
+- <big>**Images**</big> ([more info](#images))
+- <big>**Fonts**</big> ([more info](#fonts))
+- <big>**Stylesheets**</big> ([more info](#stylesheets))
+- <big>**Scripts**</big> ([more info](#scripts))
+- <big>**HTML**</big> ([more info](#html))
+- <big>**JSON**</big> ([more info](#json))
 
 
 <br>
@@ -48,11 +48,10 @@ Load.allTheThings( options )
 
 
 
-<br><div id="Markup"></div>
+<br>
 ## The Markup
 
 
-<div id="Images"></div>
 ### Images
 
 
@@ -68,7 +67,7 @@ Becomes:
 <img data-src="http://www.google.com/images/srpr/logo3w.png">
 ```
 
-<br><div id="Fonts"></div>
+<br>
 ### Fonts
 
 To fetch fonts, use the `font` element as follows:
@@ -85,7 +84,7 @@ Once the font has loaded, all elements targeted with your CSS to have `font-fami
 <small style="color:#888">__PS:__ Yes, the `font` element is deprecated with HTML5 - but all browsers support it and that's why it's perfect (less elements to traverse through).</small>
 
 
-<br><div id="Stylesheets"></div>
+<br>
 ### Stylesheets
 
 Loading stylesheets is similar to loading images. Just change the `href` to `data-href`. Example:
@@ -97,7 +96,7 @@ Loading stylesheets is similar to loading images. Just change the `href` to `dat
 When the stylesheet is done loading, it is immediately applied to the page.
 
 
-<br><div id="Scripts"></div>
+<br>
 ### Scripts
 
 JavaScript files can also be loaded similarly. Example:
@@ -109,7 +108,7 @@ JavaScript files can also be loaded similarly. Example:
 The script is immediately invoked once it is loaded.
 
 
-<br><div id="HTML"></div>
+<br>
 ### HTML
 
 To load HTML, specify a `data-src` to a `section` element where you want the content to be printed to. Example:
@@ -121,7 +120,7 @@ To load HTML, specify a `data-src` to a `section` element where you want the con
 Once the page has loaded, it will be inserted into this `section` element.
 
 
-<br><div id="JSON"></div>
+<br>
 ### JSON
 
 JSON data can be loaded through the `code` element. Example:
@@ -143,7 +142,7 @@ Load.getCached( 'myJsonData' )    // outputs your JSON data
 ===
 
 
-<br><div id="API"></div>
+<br>
 ## The API
 
 ### options.thingsToLoad
