@@ -3,7 +3,7 @@
 Load.allTheThings
 =================
 
-<small style="color:#888">Current build: _alpha_ v0.5.2 – 25 August, 2012</small>
+Current build: _beta_ v0.5.4 – 28 August, 2012
 
 A simple JavaScript library to preload resources as they are needed on your page with just one simple invocation:
 
@@ -34,6 +34,7 @@ options = {
 	thingsToLoad: [ <list_of_things> ],
 	within: <css_selector>,
 	progressId: <element_ID>,
+	progressBarID: <element_ID>,
 	thingsId: <element_ID>,
 	thingsLoadedId: <element_ID>,
 	onError: <function>,
@@ -178,12 +179,29 @@ The `ID` of the element that will display the loading progress in numbers. Examp
 
 <pre>
 &lt;!-- the html -->
-&lt;p&gt;Progress: &lt;span id="progress_count"&gt;&lt;/span&gt;%&lt;/p&gt;
+Progress:
+&lt;span id="progress_count"&gt;&lt;/span&gt;%
 </pre>
 
 ```
 // the javascript
 progressId: 'progress_count'
+```
+
+<br>
+### options.progressBarId
+
+The `ID` of the element that will display as a progress bar. Example:
+
+<pre>
+&lt;!-- the html -->
+Progress bar:
+&lt;div id="progress_bar"&gt;&lt;/div&gt;
+</pre>
+
+```
+// the javascript
+progressBarId: 'progress_bar'
 ```
 
 <br>
