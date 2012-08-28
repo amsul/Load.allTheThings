@@ -14,6 +14,11 @@
         <li>Things loaded <strong id="things_loaded"></strong></li>
         <li style="list-style:none"><br></li>
         <li>
+            <div><strong>Progress bar</strong></div>
+            <div style="height: 10px;background: red;" id="progress_bar"></div>
+        </li>
+        <li style="list-style:none"><br></li>
+        <li>
             <strong>Status:</strong>
             <ul id="status">
             </ul>
@@ -66,7 +71,7 @@
         <figure><img data-src="http://wecodestuff.co/static/media/high_five.jpg"></figure>
         <figure><img data-src="http://wecodestuff.co/static/media/homer.png"></figure>
         <!--<figure><img data-src="http://wecodestuff.co/static/media/lake.jpg"></figure>-->
-        <!--<figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>-->
+        <figure><img data-src="http://wecodestuff.co/static/media/monster.jpg"></figure>
         <!--<figure><img data-src="http://wecodestuff.co/static/media/ship_it.jpg"></figure>-->
     </section>
 
@@ -92,9 +97,10 @@
         }
 
     Load.allTheThings({
-        thingsToLoad: [ 'images', 'fonts', 'css', 'js', 'html', 'data' ],
-        within: '.loader',
+        thingsToLoad: [ 'images', 'fonts', /*'css', */'js', 'html', 'data' ],
+        //within: '.loader',
         progressId: 'progress',
+        progressBarId: 'progress_bar',
         thingsId: 'things',
         thingsLoadedId: 'things_loaded',
         onComplete: onComplete,

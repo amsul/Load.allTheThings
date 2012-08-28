@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.5.2 - 25 August, 2012
+    Load.allTheThings v0.5.4 - 28 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -74,6 +74,7 @@
         thingsToLoad: ['images', 'fonts', 'css', 'js', 'html', 'data'],
         within: null,
         progressId: null,
+        progressBarId: null,
         thingsId: null,
         thingsLoadedId: null,
         onError: function(thing) {
@@ -93,6 +94,7 @@
         Load.options[key] = options[key] || value;
       }
       Load.elemProgress = Load.options.progressId ? document.getElementById(Load.options.progressId) : null;
+      Load.elemProgressBar = Load.options.progressBarId ? document.getElementById(Load.options.progressBarId) : null;
       Load.elemThings = Load.options.thingsId ? document.getElementById(Load.options.thingsId) : null;
       Load.elemThingsLoaded = Load.options.thingsLoadedId ? document.getElementById(Load.options.thingsLoadedId) : null;
       if (Load.elemThingsLoaded) {
@@ -122,6 +124,9 @@
       if (Load.elemThings) {
         Load.elemThings.innerHTML = self.THINGS;
       }
+      if (Load.elemProgressBar) {
+        Load.elemProgressBar.style.width = 0 + '%';
+      }
       return self;
     };
 
@@ -132,23 +137,23 @@
 
 
     self.loadAllThingsWithin = function(context) {
-      var node, type, _i, _j, _len, _len1, _ref;
-      self.collectionOfNodes = [];
-      self.collectionOfThings = [];
+      var collectionOfNodes, collectionOfThings, node, type, _i, _j, _len, _len1, _ref;
+      collectionOfNodes = [];
+      collectionOfThings = [];
       if (context.constructor.name === 'NodeList') {
         for (_i = 0, _len = context.length; _i < _len; _i++) {
           node = context[_i];
-          self.collectionOfNodes.push(node);
+          collectionOfNodes.push(node);
         }
       } else {
-        self.collectionOfNodes.push(context);
+        collectionOfNodes.push(context);
       }
       _ref = Load.options.thingsToLoad;
       for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
         type = _ref[_j];
-        self.findThings(self.collectionOfNodes, type);
+        self.findThings(collectionOfNodes, collectionOfThings, type);
       }
-      self.THINGS += self.collectionOfThings.length;
+      self.THINGS += collectionOfThings.length;
       return self;
     };
 
@@ -158,8 +163,19 @@
     */
 
 
-    self.findThings = function(collection, type) {
-      var node, selector, things, _i, _len;
+    self.findThings = function(collectionNodes, collectionThings, type) {
+      var filterThenLoad, node, selector, things, _i, _len;
+      filterThenLoad = function(things, type) {
+        var thing, _i, _len;
+        for (_i = 0, _len = things.length; _i < _len; _i++) {
+          thing = things[_i];
+          if (thing.dataset && thing.dataset.src) {
+            self.load(thing, type);
+            collectionThings.push(thing);
+          }
+        }
+        return self;
+      };
       selector = (function() {
         switch (type) {
           case 'images':
@@ -178,29 +194,11 @@
             throw 'Thing type \'' + type + '\' is unknown';
         }
       })();
-      for (_i = 0, _len = collection.length; _i < _len; _i++) {
-        node = collection[_i];
+      for (_i = 0, _len = collectionNodes.length; _i < _len; _i++) {
+        node = collectionNodes[_i];
         things = node.querySelectorAll(selector);
         if (things.length) {
-          self.filterAndLoad(things, type);
-        }
-      }
-      return self;
-    };
-
-    /*
-        Filter things with `data-src` out of a list of things
-        ========================================================================
-    */
-
-
-    self.filterAndLoad = function(things, type) {
-      var thing, _i, _len;
-      for (_i = 0, _len = things.length; _i < _len; _i++) {
-        thing = things[_i];
-        if (thing.dataset && thing.dataset.src) {
-          self.load(thing, type);
-          self.collectionOfThings.push(thing);
+          filterThenLoad(things, type);
         }
       }
       return self;
@@ -243,6 +241,7 @@
       if (Load.elemProgress) {
         Load.elemProgress.innerHTML = self.PROGRESS;
       }
+      Load.elemProgressBar.style.width = self.PROGRESS + '%';
       if (Load.elemThingsLoaded) {
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }

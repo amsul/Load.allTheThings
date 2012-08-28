@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.5.2 - 25 August, 2012
+    Load.allTheThings v0.5.4 - 28 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -77,6 +77,7 @@ class Load
             thingsToLoad:           [ 'images', 'fonts', 'css', 'js', 'html', 'data' ]
             within:                 null
             progressId:             null
+            progressBarId:          null
             thingsId:               null
             thingsLoadedId:         null
             onError:                ( thing ) -> return Load
@@ -91,6 +92,7 @@ class Load
 
         ## store the elements that will need UI updates
         Load.elemProgress = if Load.options.progressId then document.getElementById Load.options.progressId else null
+        Load.elemProgressBar = if Load.options.progressBarId then document.getElementById Load.options.progressBarId else null
         Load.elemThings = if Load.options.thingsId then document.getElementById Load.options.thingsId else null
         Load.elemThingsLoaded = if Load.options.thingsLoadedId then document.getElementById Load.options.thingsLoadedId else null
 
@@ -117,6 +119,7 @@ class Load
 
         ## update the UI with the final count of things
         if Load.elemThings then Load.elemThings.innerHTML = self.THINGS
+        if Load.elemProgressBar then Load.elemProgressBar.style.width = 0 + '%'
 
         return self
 
@@ -130,29 +133,29 @@ class Load
     self.loadAllThingsWithin = ( context ) ->
 
         ## collection for context nodes
-        self.collectionOfNodes = []
+        collectionOfNodes = []
 
         ## collection of all the things found
-        self.collectionOfThings = []
+        collectionOfThings = []
 
 
         ## check if the context is a nodelist
         if context.constructor.name is 'NodeList'
 
             ## push all the context elements into a collection
-            self.collectionOfNodes.push node for node in context
+            collectionOfNodes.push node for node in context
 
 
         ## if it's not a nodelist, just pass into collection
-        else self.collectionOfNodes.push context
+        else collectionOfNodes.push context
 
 
         ## go through the type of things to load, and find them
-        self.findThings self.collectionOfNodes, type for type in Load.options.thingsToLoad
+        self.findThings collectionOfNodes, collectionOfThings, type for type in Load.options.thingsToLoad
 
 
         ## update the count of things
-        self.THINGS += self.collectionOfThings.length
+        self.THINGS += collectionOfThings.length
 
         return self
 
@@ -163,7 +166,25 @@ class Load
     Find things to load in a collection
     ======================================================================== ###
 
-    self.findThings = ( collection, type ) ->
+    self.findThings = ( collectionNodes, collectionThings, type ) ->
+
+        ## filter things with `data-src` out of a list of things
+        filterThenLoad = ( things, type ) ->
+
+            ## go through the things and filter out ones with `data-src`
+            for thing in things
+
+                ## if there is a `data-src`
+                if thing.dataset and thing.dataset.src
+
+                    ## begin loading the thing
+                    self.load thing, type
+
+                    ## put the thing in the collection
+                    collectionThings.push thing
+
+            return self
+
 
         ## create a selector based on type
         selector = ( ->
@@ -179,37 +200,14 @@ class Load
 
 
         ## get things of this type within the collection
-        for node in collection
+        for node in collectionNodes
 
             ## find the things of this type in this node
             things = node.querySelectorAll selector
 
             ## if there are matching things
-            self.filterAndLoad things, type if things.length
+            filterThenLoad things, type if things.length
 
-
-        return self
-
-
-
-
-    ###
-    Filter things with `data-src` out of a list of things
-    ======================================================================== ###
-
-    self.filterAndLoad = ( things, type ) ->
-
-        ## go through the things and filter out ones with `data-src`
-        for thing in things
-
-            ## if there is a `data-src`
-            if thing.dataset and thing.dataset.src
-
-                ## begin loading the thing
-                self.load thing, type
-
-                ## put the thing in the collection
-                self.collectionOfThings.push thing
 
         return self
 
@@ -265,6 +263,7 @@ class Load
 
         ## update the UI
         Load.elemProgress.innerHTML = self.PROGRESS if Load.elemProgress
+        Load.elemProgressBar.style.width = self.PROGRESS + '%'
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
 
 
