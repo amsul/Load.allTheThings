@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.5.4 - 28 August, 2012
+    Load.allTheThings v0.5.7 - 29 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -28,6 +28,9 @@
 
     To invoke the loader, use Load.allTheThings()
     For more documentation, check http://github.com/amsul/Load.allTheThings
+
+
+    * Note: Load.fonts is required to load fonts (http://github.com/amsul/Load.fonts)
 */
 
 
@@ -77,6 +80,7 @@
         progressBarId: null,
         thingsId: null,
         thingsLoadedId: null,
+        cleanUp: true,
         onError: function(thing) {
           return Load;
         },
@@ -106,7 +110,7 @@
       context = (function() {
         var selector;
         selector = Load.options.within;
-        if (selector) {
+        if (selector && typeof selector === 'string') {
           if (selector.match(/^#/)) {
             return document.getElementById(selector.replace(/^#/, ''));
           } else if (selector.match(/^\./)) {
@@ -225,6 +229,21 @@
         } else {
           thing.src = request;
         }
+      }
+      self.doCleanUp(thing, type);
+      return self;
+    };
+
+    /*
+        Do a clean up of the thing data-src
+        ========================================================================
+    */
+
+
+    self.doCleanUp = function(thing, type) {
+      thing.removeAttribute('data-src');
+      if (type === 'data') {
+        thing.style.display = 'none';
       }
       return self;
     };

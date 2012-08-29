@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.5.4 - 28 August, 2012
+    Load.allTheThings v0.5.7 - 29 August, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -24,13 +24,15 @@
 
     To invoke the loader, use Load.allTheThings()
     For more documentation, check http://github.com/amsul/Load.allTheThings
+
+
+    * Note: Load.fonts is required to load fonts (http://github.com/amsul/Load.fonts)
 ###
 
 ###jshint debug: true, browser: true, devel: true, curly: false, forin: false, nonew: true, plusplus: false###
 
 
 ## TODO:
-## - add a method to clean up after a thing is loaded
 ## - check if thing loaded is valid based on type
 
 
@@ -80,6 +82,7 @@ class Load
             progressBarId:          null
             thingsId:               null
             thingsLoadedId:         null
+            cleanUp:                true
             onError:                ( thing ) -> return Load
             onLoad:                 ( thing ) -> return Load
             onComplete:             -> return Load
@@ -105,7 +108,7 @@ class Load
         ## figure out the context
         context = ( ->
             selector = Load.options.within
-            if selector
+            if selector and typeof selector is 'string'
                 if selector.match /^#/ then document.getElementById selector.replace /^#/, ''
                 else if selector.match /^\./ then document.getElementsByClassName selector.replace /^\./, ''
                 else document.querySelectorAll selector
@@ -245,6 +248,22 @@ class Load
             if type is 'css' then thing.href = request
             else thing.src = request
 
+
+        ## do cleanup on the thing element
+        self.doCleanUp thing, type
+
+        return self
+
+
+
+
+    ###
+    Do a clean up of the thing data-src
+    ======================================================================== ###
+
+    self.doCleanUp = ( thing, type ) ->
+        thing.removeAttribute 'data-src'
+        thing.style.display = 'none' if type is 'data'
         return self
 
 
