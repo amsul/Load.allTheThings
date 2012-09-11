@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Load.allthethings by amsul</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Load.allthethings</h1>
+        <h2>A simple JavaScript library to preload resources as they are needed</h2>
+        <a href="https://github.com/amsul/Load.allTheThings" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><img src="http://i.imgur.com/PdbF7.png" alt="Load.allTheThings"></p>
+
+<h1>Load.allTheThings</h1>
+
+<p>Current build: <em>beta</em> v0.7.0 – 11 September, 2012</p>
+
+<p>A simple JavaScript library to load resources as they are needed on your page with just one simple invocation:</p>
+
+<pre><code>Load.allTheThings()
+</code></pre>
+
+<p><br></p>
+
+<h3>Things you can load</h3>
+
+<ul>
+<li>
+<strong>Images</strong> (<a href="#images">more info</a>)</li>
+<li>
+<strong>Fonts</strong> (<a href="#fonts">more info</a>)</li>
+<li>
+<strong>Stylesheets</strong> (<a href="#stylesheets">more info</a>)</li>
+<li>
+<strong>Scripts</strong> (<a href="#scripts">more info</a>)</li>
+<li>
+<strong>HTML</strong> (<a href="#html">more info</a>)</li>
+<li>
+<strong>JSON</strong> (<a href="#json">more info</a>)</li>
+</ul><p><br></p>
+
+<h4>Options</h4>
+
+<p>There are a few options available to be passed into your loader. <a href="#the-api">Read the API</a> for more details on how to use.</p>
+
+<pre><code>options = {
+    thingsToLoad: [ &lt;list_of_things&gt; ],
+    within: &lt;css_selector&gt;,
+    progressId: &lt;element_ID&gt;,
+    progressBarID: &lt;element_ID&gt;,
+    thingsId: &lt;element_ID&gt;,
+    thingsLoadedId: &lt;element_ID&gt;,
+    onError: &lt;function&gt;,
+    onLoad: &lt;function&gt;,
+    onComplete: &lt;function&gt;
+}
+
+Load.allTheThings( options )
+</code></pre>
+
+<p><br></p>
+
+<h2>The Markup</h2>
+
+<h3>Images</h3>
+
+<p>To have any image preload, simply change it's <code>src</code> to <code>data-src</code>. For example:</p>
+
+<pre><code>&lt;img src="http://www.google.com/images/srpr/logo3w.png"&gt;
+</code></pre>
+
+<p>Becomes:</p>
+
+<pre><code>&lt;img data-src="http://www.google.com/images/srpr/logo3w.png"&gt;
+</code></pre>
+
+<p><br></p>
+
+<h3>Fonts</h3>
+
+<p>To fetch fonts, use the <code>font</code> element as follows:</p>
+
+<pre><code>&lt;font data-family="My Family Name" data-src="media/myfont.ttf"&gt;&lt;/font&gt;
+</code></pre>
+
+<p>Both the <code>data-family</code> and <code>data-src</code> are required attributes.</p>
+
+<p>Once the font has loaded, all elements targeted with your CSS to have <code>font-family: "My Family Name"</code> will have your typeface.</p>
+
+<p><sub><strong>PS:</strong> Yes, the <code>font</code> element has deprecated with HTML5 - but all browsers support it and that's why it's perfect (less elements to traverse through).</sub></p>
+
+<p><br></p>
+
+<h3>Stylesheets</h3>
+
+<p>Loading stylesheets is similar to loading images. Just change the <code>href</code> to <code>data-src</code>. Example:</p>
+
+<pre><code>&lt;link data-src="http://html5boilerplate.com/css/_normalize.css"&gt;
+</code></pre>
+
+<p>When the stylesheet is done loading, it is immediately applied to the page.</p>
+
+<p><br></p>
+
+<h3>Scripts</h3>
+
+<p>JavaScript files can also be loaded similarly. Example:</p>
+
+<pre>
+&lt;script data-src="http://code.jquery.com/jquery-1.8.0.js"&gt;&lt;/script&gt;
+</pre>
+
+<p>The script is immediately invoked once it is loaded.</p>
+
+<p><br></p>
+
+<h3>HTML</h3>
+
+<p>To load HTML, specify a <code>data-src</code> to a <code>section</code> element where you want the content to be printed to. Example:</p>
+
+<pre><code>&lt;section data-src="media/ajaxed_page.htm"&gt;&lt;/section&gt;
+</code></pre>
+
+<p>Once the page has loaded, it will be inserted into this <code>section</code> element.</p>
+
+<p><br></p>
+
+<h3>JSON</h3>
+
+<p>JSON data can be loaded through the <code>code</code> element. Example:</p>
+
+<pre><code>&lt;code data-name="myJsonData" data-src="media/data.json"&gt;&lt;/code&gt;
+</code></pre>
+
+<p>Both the <code>data-name</code> and <code>data-src</code> are required attributes.</p>
+
+<p>Once the data has loaded, you can use the <code>Load.getCached</code> method to retrieve this data depending on the <code>data-name</code> you provided:</p>
+
+<pre><code>Load.getCached( 'myJsonData' )    // outputs your JSON data
+</code></pre>
+
+<p><br><br></p>
+
+<h1></h1>
+
+<p><br></p>
+
+<h2>The API</h2>
+
+<h3>options.thingsToLoad</h3>
+
+<p>An array of things you would like to load.</p>
+
+<pre><code>thingsToLoad: [ 'images', 'fonts', 'css', 'js', 'html', 'data' ]
+</code></pre>
+
+<p>By default, it will load all of the things. You can pick and choose the things you want to load and <a href="#Markup">markup your document accordingly</a>.</p>
+
+<p>The <code>data</code> thing is for fetching JSON data. Once the loader has completed, a <code>Load.getCached</code> method is available to retrieve this stored JSON. More on this in the <a href="#JSON">JSON</a> section.</p>
+
+<p><br></p>
+
+<h3>options.within</h3>
+
+<p>You can give context to your search of things to load with a CSS selector. By default, it will search the entire document. Example:</p>
+
+<pre><code>within: '#content'
+
+// or
+within: '.preload'
+
+// or
+within: 'section'
+</code></pre>
+
+<p><br></p>
+
+<h3>options.progressId</h3>
+
+<p>The <code>ID</code> of the element that will display the loading progress in numbers. Example:</p>
+
+<pre>
+&lt;!-- the html --&gt;
+Progress:
+&lt;span id="progress_count"&gt;&lt;/span&gt;%
+</pre>
+
+<pre><code>// the javascript
+progressId: 'progress_count'
+</code></pre>
+
+<p><br></p>
+
+<h3>options.progressBarId</h3>
+
+<p>The <code>ID</code> of the element that will display as a progress bar. Example:</p>
+
+<pre>
+&lt;!-- the html --&gt;
+Progress bar:
+&lt;div id="progress_bar"&gt;&lt;/div&gt;
+</pre>
+
+<pre><code>// the javascript
+progressBarId: 'progress_bar'
+</code></pre>
+
+<p><br></p>
+
+<h3>options.thingsId</h3>
+
+<p>The <code>ID</code> of the element that will display the total number of things there are to load. Similar format as needed for <code>options.progressId</code>.</p>
+
+<p><br></p>
+
+<h3>options.thingsLoadedId</h3>
+
+<p>The <code>ID</code> of the element that will display a live count on the number of things that have loaded. Similar format as needed for <code>options.progressId</code>.</p>
+
+<p><br></p>
+
+<h3>options.onError and options.onLoad</h3>
+
+<p><strong>options.onError</strong> is called if something goes wrong in loading any thing. <strong>options.onLoad</strong> is called as each individual thing is loaded. Example:</p>
+
+<pre><code>onError: function( thing, type ) {
+    console.error( 'There was an error loading a thing of ' + type + '.', thing )
+},
+onLoad: function( thing, type ) {
+    console.log( 'Done loading a thing of ' + type + '.', thing )
+}
+</code></pre>
+
+<p><br></p>
+
+<h3>options.onComplete</h3>
+
+<p>This is called when the loader has finished loading all the things.</p>
+
+<pre><code>options.onComplete = function() {
+    alert( 'All the things have loaded!' )
+}
+</code></pre>
+
+<p><br><br></p>
+
+<hr><p>This code is (c) Amsul Naeem, 2012 – Licensed under the MIT ("expat" flavor) license.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/amsul/Load.allTheThings/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/amsul/Load.allTheThings/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/amsul/Load.allTheThings"></a> is maintained by <a href="https://github.com/amsul">amsul</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-34741130-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
