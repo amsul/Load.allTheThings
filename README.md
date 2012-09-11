@@ -3,9 +3,9 @@
 Load.allTheThings
 =================
 
-Current build: _beta_ v0.5.4 – 28 August, 2012
+Current build: _beta_ v0.7.0 – 11 September, 2012
 
-A simple JavaScript library to preload resources as they are needed on your page with just one simple invocation:
+A simple JavaScript library to load resources as they are needed on your page with just one simple invocation:
 
 ```
 Load.allTheThings()
@@ -82,16 +82,16 @@ Both the `data-family` and `data-src` are required attributes.
 Once the font has loaded, all elements targeted with your CSS to have `font-family: "My Family Name"` will have your typeface.
 
 
-<small style="color:#888">__PS:__ Yes, the `font` element is deprecated with HTML5 - but all browsers support it and that's why it's perfect (less elements to traverse through).</small>
+<sub>__PS:__ Yes, the `font` element has deprecated with HTML5 - but all browsers support it and that's why it's perfect (less elements to traverse through).</sub>
 
 
 <br>
 ### Stylesheets
 
-Loading stylesheets is similar to loading images. Just change the `href` to `data-href`. Example:
+Loading stylesheets is similar to loading images. Just change the `href` to `data-src`. Example:
 
 ```
-<link data-src="http://html5boilerplate.com/css/style.css?v3launch">
+<link data-src="http://html5boilerplate.com/css/_normalize.css">
 ```
 
 When the stylesheet is done loading, it is immediately applied to the page.
@@ -166,8 +166,10 @@ You can give context to your search of things to load with a CSS selector. By de
 
 ```
 within: '#content'
+
 // or
 within: '.preload'
+
 // or
 within: 'section'
 ```
