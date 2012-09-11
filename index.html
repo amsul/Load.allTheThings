@@ -62,18 +62,18 @@
           <p>There are a few options available to be passed into your loader. <a href="#the-api">Read the API</a> for more details on how to use.</p>
 
           <pre><code>options = {
-              thingsToLoad: [ &lt;list_of_things&gt; ],
-              within: &lt;css_selector&gt;,
-              progressId: &lt;element_ID&gt;,
-              progressBarID: &lt;element_ID&gt;,
-              thingsId: &lt;element_ID&gt;,
-              thingsLoadedId: &lt;element_ID&gt;,
-              onError: &lt;function&gt;,
-              onLoad: &lt;function&gt;,
-              onComplete: &lt;function&gt;
-          }
+    thingsToLoad: [ &lt;list_of_things&gt; ],
+    within: &lt;css_selector&gt;,
+    progressId: &lt;element_ID&gt;,
+    progressBarID: &lt;element_ID&gt;,
+    thingsId: &lt;element_ID&gt;,
+    thingsLoadedId: &lt;element_ID&gt;,
+    onError: &lt;function&gt;,
+    onLoad: &lt;function&gt;,
+    onComplete: &lt;function&gt;
+}
 
-          Load.allTheThings( options )
+Load.allTheThings( options )
           </code></pre>
 
           <p><br></p>
@@ -181,12 +181,12 @@
 
           <pre><code>within: '#content'
 
-          // or
-          within: '.preload'
+// or
+within: '.preload'
 
-          // or
-          within: 'section'
-          </code></pre>
+// or
+within: 'section'
+</code></pre>
 
           <p><br></p>
 
@@ -195,12 +195,12 @@
           <p>The <code>ID</code> of the element that will display the loading progress in numbers. Example:</p>
 
           <pre><code>&lt;!-- the html --&gt;
-          Progress:
-          &lt;span id="progress_count"&gt;&lt;/span&gt;%
+Progress:
+&lt;span id="progress_count"&gt;&lt;/span&gt;%
           </code></pre>
 
           <pre><code>// the javascript
-          progressId: 'progress_count'
+progressId: 'progress_count'
           </code></pre>
 
           <p><br></p>
@@ -210,12 +210,12 @@
           <p>The <code>ID</code> of the element that will display as a progress bar. Example:</p>
 
           <pre><code>&lt;!-- the html --&gt;
-          Progress bar:
-          &lt;div id="progress_bar"&gt;&lt;/div&gt;
+Progress bar:
+&lt;div id="progress_bar"&gt;&lt;/div&gt;
           </code></pre>
 
           <pre><code>// the javascript
-          progressBarId: 'progress_bar'
+progressBarId: 'progress_bar'
           </code></pre>
 
           <p><br></p>
@@ -237,11 +237,11 @@
           <p><strong>options.onError</strong> is called if something goes wrong in loading any thing. <strong>options.onLoad</strong> is called as each individual thing is loaded. Example:</p>
 
           <pre><code>onError: function( thing, type ) {
-              console.error( 'There was an error loading a thing of ' + type + '.', thing )
-          },
-          onLoad: function( thing, type ) {
-              console.log( 'Done loading a thing of ' + type + '.', thing )
-          }
+    console.error( 'There was an error loading a thing of ' + type + '.', thing )
+},
+onLoad: function( thing, type ) {
+    console.log( 'Done loading a thing of ' + type + '.', thing )
+}
           </code></pre>
 
           <p><br></p>
@@ -251,8 +251,8 @@
           <p>This is called when the loader has finished loading all the things.</p>
 
           <pre><code>options.onComplete = function() {
-              alert( 'All the things have loaded!' )
-          }
+    alert( 'All the things have loaded!' )
+}
           </code></pre>
 
           <p><br><br></p>
