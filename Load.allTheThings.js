@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.5.7 - 29 August, 2012
+    Load.allTheThings v0.7.0 - 11 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -43,11 +43,28 @@
     __hasProp = {}.hasOwnProperty;
 
   Load = (function() {
-    var self;
+    var dom, self;
 
     function Load() {}
 
+    window.Load = Load;
+
     self = {};
+
+    dom = {
+      get: function(selector) {
+        if (selector && typeof selector === 'string') {
+          if (selector.match(/^#/)) {
+            return document.getElementById(selector.replace(/^#/, ''));
+          } else if (selector.match(/^\./)) {
+            return document.getElementsByClassName(selector.replace(/^\./, ''));
+          } else {
+            return document.querySelectorAll(selector);
+          }
+        }
+        return null;
+      }
+    };
 
     /*
         Load all the things!
@@ -80,7 +97,7 @@
         progressBarId: null,
         thingsId: null,
         thingsLoadedId: null,
-        cleanUp: true,
+        cleanUp: false,
         onError: function(thing) {
           return Load;
         },
@@ -97,10 +114,15 @@
         value = _ref[key];
         Load.options[key] = options[key] || value;
       }
-      Load.elemProgress = Load.options.progressId ? document.getElementById(Load.options.progressId) : null;
-      Load.elemProgressBar = Load.options.progressBarId ? document.getElementById(Load.options.progressBarId) : null;
-      Load.elemThings = Load.options.thingsId ? document.getElementById(Load.options.thingsId) : null;
-      Load.elemThingsLoaded = Load.options.thingsLoadedId ? document.getElementById(Load.options.thingsLoadedId) : null;
+      if (Load.options.thingsToLoad.indexOf('fonts' !== -1)) {
+        if (!window.Font || !window.Font.prototype.isLoadDotFonts) {
+          throw 'Load.fonts (http://github.com/amsul/Load.fonts) is required for Load.allTheThings to work with fonts.';
+        }
+      }
+      Load.elemProgress = dom.get('#' + Load.options.progressId);
+      Load.elemProgressBar = dom.get('#' + Load.options.progressBarId);
+      Load.elemThings = dom.get('#' + Load.options.thingsId);
+      Load.elemThingsLoaded = dom.get('#' + Load.options.thingsLoadedId);
       if (Load.elemThingsLoaded) {
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }
@@ -109,18 +131,8 @@
       }
       context = (function() {
         var selector;
-        selector = Load.options.within;
-        if (selector && typeof selector === 'string') {
-          if (selector.match(/^#/)) {
-            return document.getElementById(selector.replace(/^#/, ''));
-          } else if (selector.match(/^\./)) {
-            return document.getElementsByClassName(selector.replace(/^\./, ''));
-          } else {
-            return document.querySelectorAll(selector);
-          }
-        } else {
-          return document;
-        }
+        selector = dom.get(Load.options.within);
+        return selector || document;
       })();
       if (context) {
         self.loadAllThingsWithin(context);
@@ -242,8 +254,12 @@
 
     self.doCleanUp = function(thing, type) {
       thing.removeAttribute('data-src');
-      if (type === 'data') {
-        thing.style.display = 'none';
+      if (type === 'data' || type === 'fonts') {
+        if (Load.options.cleanUp) {
+          thing.outerHTML = '';
+        } else {
+          thing.style.display = 'none';
+        }
       }
       return self;
     };
@@ -335,7 +351,6 @@
         };
         request.onerror = function() {
           self.removeHandlers(request, type);
-          console.log('onerror', thing, type);
         };
         request.open('GET', thing.dataset.src, true);
         request.send();
@@ -370,7 +385,6 @@
         if (thing.readyState === 'complete') {
           self.removeHandlers(thing, type).thingLoaded(thing, type);
         }
-        console.log('onReadyStateChange', e);
       };
       onError = function(e) {
         self.removeHandlers(thing, type);
@@ -407,22 +421,12 @@
 
 
     Load.getCached = function(name) {
-      return self.cache[name];
-    };
-
-    /*
-        Intialize the loading
-        ========================================================================
-    */
-
-
-    self.initialize = (function() {
-      if (!window.Font || !window.Font.prototype.isLoadDotFonts) {
-        throw 'Load.fonts is required for Load.allTheThings to work.';
+      var cachedThing;
+      cachedThing = self.cache[name];
+      if (cachedThing) {
+        return cachedThing;
       }
-      window.Load = Load;
-      return self;
-    })();
+    };
 
     return Load;
 

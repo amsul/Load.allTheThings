@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.5.7 - 29 August, 2012
+    Load.allTheThings v0.7.0 - 11 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -32,13 +32,24 @@
 ###jshint debug: true, browser: true, devel: true, curly: false, forin: false, nonew: true, plusplus: false###
 
 
-## TODO:
-## - check if thing loaded is valid based on type
-
-
 class Load
 
+
+    ## create a global reach
+    window.Load = Load
+
+    ## for private methods
     self = {}
+
+    ## for querying the dom
+    dom =
+        get: ( selector ) ->
+            if selector and typeof selector is 'string'
+                if selector.match /^#/ then return document.getElementById selector.replace /^#/, ''
+                else if selector.match /^\./ then return document.getElementsByClassName selector.replace /^\./, ''
+                else return document.querySelectorAll selector
+            return null
+
 
 
 
@@ -53,6 +64,7 @@ class Load
 
         return Load
     #allTheThings
+
 
 
     ###
@@ -82,7 +94,7 @@ class Load
             progressBarId:          null
             thingsId:               null
             thingsLoadedId:         null
-            cleanUp:                true
+            cleanUp:                false
             onError:                ( thing ) -> return Load
             onLoad:                 ( thing ) -> return Load
             onComplete:             -> return Load
@@ -93,38 +105,43 @@ class Load
             Load.options[ key ] = options[ key ] || value
 
 
+        ## check if fonts are being requested
+        if Load.options.thingsToLoad.indexOf 'fonts' isnt -1
+
+            ## check if Load.fonts has been attached
+            if not window.Font or not window.Font::isLoadDotFonts
+                throw 'Load.fonts (http://github.com/amsul/Load.fonts) is required for Load.allTheThings to work with fonts.'
+
+
         ## store the elements that will need UI updates
-        Load.elemProgress = if Load.options.progressId then document.getElementById Load.options.progressId else null
-        Load.elemProgressBar = if Load.options.progressBarId then document.getElementById Load.options.progressBarId else null
-        Load.elemThings = if Load.options.thingsId then document.getElementById Load.options.thingsId else null
-        Load.elemThingsLoaded = if Load.options.thingsLoadedId then document.getElementById Load.options.thingsLoadedId else null
+        Load.elemProgress = dom.get '#' + Load.options.progressId
+        Load.elemProgressBar = dom.get '#' + Load.options.progressBarId
+        Load.elemThings = dom.get '#' + Load.options.thingsId
+        Load.elemThingsLoaded = dom.get '#' + Load.options.thingsLoadedId
 
 
         # put in all the initial counts
-        if Load.elemThingsLoaded then Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED
-        if Load.elemProgress then Load.elemProgress.innerHTML = self.PROGRESS
+        Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
+        Load.elemProgress.innerHTML = self.PROGRESS if Load.elemProgress
 
 
         ## figure out the context
         context = ( ->
-            selector = Load.options.within
-            if selector and typeof selector is 'string'
-                if selector.match /^#/ then document.getElementById selector.replace /^#/, ''
-                else if selector.match /^\./ then document.getElementsByClassName selector.replace /^\./, ''
-                else document.querySelectorAll selector
-            else document
+            selector = dom.get Load.options.within
+            return selector || document
         )()
 
 
         ## collect all the required things within the context
-        if context then self.loadAllThingsWithin context
+        self.loadAllThingsWithin context if context
 
 
         ## update the UI with the final count of things
-        if Load.elemThings then Load.elemThings.innerHTML = self.THINGS
-        if Load.elemProgressBar then Load.elemProgressBar.style.width = 0 + '%'
+        Load.elemThings.innerHTML = self.THINGS if Load.elemThings
+        Load.elemProgressBar.style.width = 0 + '%' if Load.elemProgressBar
 
         return self
+    #beginLoading
 
 
 
@@ -161,6 +178,7 @@ class Load
         self.THINGS += collectionOfThings.length
 
         return self
+    #loadAllThingsWithin
 
 
 
@@ -213,6 +231,7 @@ class Load
 
 
         return self
+    #findThings
 
 
 
@@ -253,6 +272,7 @@ class Load
         self.doCleanUp thing, type
 
         return self
+    #load
 
 
 
@@ -262,9 +282,23 @@ class Load
     ======================================================================== ###
 
     self.doCleanUp = ( thing, type ) ->
+
+        ## remove the data binding
         thing.removeAttribute 'data-src'
-        thing.style.display = 'none' if type is 'data'
+
+
+        ## only for data and fonts
+        if type is 'data' or type is 'fonts'
+
+            ## if a total clean up is required, remove thing from the dom
+            if Load.options.cleanUp then thing.outerHTML = ''
+
+            ## otherwise hide the thing
+            else thing.style.display = 'none'
+
+
         return self
+    #doCleanup
 
 
 
@@ -301,6 +335,7 @@ class Load
         self.loadComplete() if self.THINGS_LOADED is self.THINGS
 
         return self
+    #thingLoaded
 
 
 
@@ -381,7 +416,6 @@ class Load
 
             request.onerror = ->
                 self.removeHandlers request, type
-                console.log( 'onerror', thing, type )
                 return
 
 
@@ -392,6 +426,8 @@ class Load
             console.log( 'no add handler', thing, type )
 
         return self
+    #addHandlers
+
 
     self.removeHandlers = ( thing, type ) ->
 
@@ -414,6 +450,8 @@ class Load
             console.log( 'no remove handler', thing, type )
 
         return self
+    #removeHandlers
+
 
     self.commonHandlers = ( thing, type ) ->
 
@@ -428,7 +466,6 @@ class Load
                 self.
                     removeHandlers( thing, type ).
                     thingLoaded( thing, type )
-            console.log( 'onReadyStateChange', e )
             return
 
         onError = ( e ) ->
@@ -442,6 +479,7 @@ class Load
             bind( thing, 'error', onError )
 
         return self
+    #commonHandlers
 
 
 
@@ -466,33 +504,20 @@ class Load
                 throw 'No name given to this type \'' + type + '\''
 
         return self
+    #addToCache
+
 
 
     ###
     Get a thing from cache
     ======================================================================== ###
 
-    Load.getCached = ( name ) -> self.cache[ name ]
+    Load.getCached = ( name ) ->
+        cachedThing = self.cache[ name ]
+        if cachedThing then return cachedThing
 
 
 
-
-    ###
-    Intialize the loading
-    ======================================================================== ###
-
-    self.initialize = (->
-
-        ## check if Load.fonts has been attached
-        if not window.Font or not window.Font::isLoadDotFonts
-            throw 'Load.fonts is required for Load.allTheThings to work.'
-
-        ## create a global reach
-        window.Load = Load
-
-        return self
-    )()
-    #initialize
 
 
 
