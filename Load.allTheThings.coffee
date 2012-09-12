@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.7.0 - 11 September, 2012
+    Load.allTheThings v0.7.1 - 12 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -316,7 +316,7 @@ class Load
 
         ## update the UI
         Load.elemProgress.innerHTML = self.PROGRESS if Load.elemProgress
-        Load.elemProgressBar.style.width = self.PROGRESS + '%'
+        Load.elemProgressBar.style.width = self.PROGRESS + '%' if Load.elemProgressBar
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED if Load.elemThingsLoaded
 
 

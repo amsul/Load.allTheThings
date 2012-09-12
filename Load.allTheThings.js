@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.7.0 - 11 September, 2012
+    Load.allTheThings v0.7.1 - 12 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -276,7 +276,9 @@
       if (Load.elemProgress) {
         Load.elemProgress.innerHTML = self.PROGRESS;
       }
-      Load.elemProgressBar.style.width = self.PROGRESS + '%';
+      if (Load.elemProgressBar) {
+        Load.elemProgressBar.style.width = self.PROGRESS + '%';
+      }
       if (Load.elemThingsLoaded) {
         Load.elemThingsLoaded.innerHTML = self.THINGS_LOADED;
       }
