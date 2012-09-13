@@ -16,7 +16,7 @@
 
 
 /*!
-    Load.allTheThings v0.7.1 - 12 September, 2012
+    Load.allTheThings v0.7.2 - 12 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -153,7 +153,7 @@
 
 
     self.loadAllThingsWithin = function(context) {
-      var collectionOfNodes, collectionOfThings, node, type, _i, _j, _len, _len1, _ref;
+      var collectionOfNodes, collectionOfThings, node, thingsToLoad, type, _i, _j, _len, _len1;
       collectionOfNodes = [];
       collectionOfThings = [];
       if (context.constructor.name === 'NodeList') {
@@ -164,9 +164,10 @@
       } else {
         collectionOfNodes.push(context);
       }
-      _ref = Load.options.thingsToLoad;
-      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-        type = _ref[_j];
+      thingsToLoad = Load.options.thingsToLoad;
+      thingsToLoad = typeof thingsToLoad === 'string' ? [thingsToLoad] : thingsToLoad;
+      for (_j = 0, _len1 = thingsToLoad.length; _j < _len1; _j++) {
+        type = thingsToLoad[_j];
         self.findThings(collectionOfNodes, collectionOfThings, type);
       }
       self.THINGS += collectionOfThings.length;

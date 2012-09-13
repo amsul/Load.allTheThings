@@ -12,7 +12,7 @@
     ----------------------------------------------------------------------------------------------------------------------------------
 ###
 ###!
-    Load.allTheThings v0.7.1 - 12 September, 2012
+    Load.allTheThings v0.7.2 - 12 September, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -171,7 +171,9 @@ class Load
 
 
         ## go through the type of things to load, and find them
-        self.findThings collectionOfNodes, collectionOfThings, type for type in Load.options.thingsToLoad
+        thingsToLoad = Load.options.thingsToLoad
+        thingsToLoad = if typeof thingsToLoad is 'string' then [ thingsToLoad ] else thingsToLoad
+        self.findThings collectionOfNodes, collectionOfThings, type for type in thingsToLoad
 
 
         ## update the count of things

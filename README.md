@@ -3,7 +3,7 @@
 Load.allTheThings
 =================
 
-Current build: _beta_ v0.7.0 – 11 September, 2012
+Current build: _beta_ v0.7.2 – 12 September, 2012
 
 A simple JavaScript library to load resources as they are needed on your page with just one simple invocation:
 
